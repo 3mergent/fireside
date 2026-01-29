@@ -284,6 +284,16 @@ function XPTracker:UpdateLayout()
     -- TIME number - offset up for visual balance
     timeToLevelText:ClearAllPoints()
     timeToLevelText:SetPoint("CENTER", timeCard, "CENTER", 0, 8)
+
+    -- Update XP bar width when frame is resized
+    local currentXP = UnitXP("player")
+    local maxXP = UnitXPMax("player")
+    if maxXP > 0 then
+        local percentage = (currentXP / maxXP) * 100
+        local availableWidth = currentXPCard:GetWidth() - (cardPadding * 2)
+        local barWidth = availableWidth * (percentage / 100)
+        xpBarFg:SetWidth(barWidth)
+    end
 end
 
 -- Handle frame resize
