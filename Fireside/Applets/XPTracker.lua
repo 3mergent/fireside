@@ -353,9 +353,10 @@ function XPTracker:UpdateCurrentXP()
         currentXPLabel:SetText("CURRENT XP")
         currentXPLabel:SetTextColor(1, 1, 1, 1)  -- White
 
-        -- Clear test mode when timer expires
+        -- Clear test mode and timer when expires
         if levelUpTestMode then
             levelUpTestMode = false
+            levelUpTime = 0
         end
     end
 
