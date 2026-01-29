@@ -10,8 +10,11 @@ local XPTracker = Fireside.Applet:New("XPTracker", 280, 230, 250, 400, 200, 350)
 local titleText
 local currentXPText
 local currentXPLabel
-local leftColumnFrame
-local rightColumnFrame
+local currentXPCard
+local xpPerHourCard
+local killsCard
+local nextLevelCard
+local timeCard
 local xpPerHourText
 local xpPerHourLabel
 local killsToLevelText
@@ -53,74 +56,46 @@ function XPTracker:OnInitialize()
     currentXPLabel:SetPoint("TOP", currentXPText, "BOTTOM", 0, -2)
     currentXPLabel:SetText("CURRENT XP")
 
-    -- Create column container frames with borders
-    -- Left column (XP/HR and NEXT)
-    leftColumnFrame = CreateFrame("Frame", nil, self.frame)
-    leftColumnFrame:SetFrameLevel(self.frame:GetFrameLevel() + 2)
+    -- Helper function to create a bordered card
+    local function CreateBorderedCard(parent)
+        local card = CreateFrame("Frame", nil, parent)
+        card:SetFrameLevel(parent:GetFrameLevel() + 2)
 
-    -- Create 4 thin border textures (top, bottom, left, right) as OVERLAY to be visible
-    local leftBorderTop = leftColumnFrame:CreateTexture(nil, "OVERLAY")
-    leftBorderTop:SetHeight(1)
-    leftBorderTop:SetColorTexture(0.4, 0.4, 0.4, 1)
+        -- Create 4 border edges
+        local borderTop = card:CreateTexture(nil, "OVERLAY")
+        borderTop:SetHeight(1)
+        borderTop:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderTop:SetPoint("TOPLEFT", card, "TOPLEFT")
+        borderTop:SetPoint("TOPRIGHT", card, "TOPRIGHT")
 
-    local leftBorderBottom = leftColumnFrame:CreateTexture(nil, "OVERLAY")
-    leftBorderBottom:SetHeight(1)
-    leftBorderBottom:SetColorTexture(0.4, 0.4, 0.4, 1)
+        local borderBottom = card:CreateTexture(nil, "OVERLAY")
+        borderBottom:SetHeight(1)
+        borderBottom:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderBottom:SetPoint("BOTTOMLEFT", card, "BOTTOMLEFT")
+        borderBottom:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT")
 
-    local leftBorderLeft = leftColumnFrame:CreateTexture(nil, "OVERLAY")
-    leftBorderLeft:SetWidth(1)
-    leftBorderLeft:SetColorTexture(0.4, 0.4, 0.4, 1)
+        local borderLeft = card:CreateTexture(nil, "OVERLAY")
+        borderLeft:SetWidth(1)
+        borderLeft:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderLeft:SetPoint("TOPLEFT", card, "TOPLEFT")
+        borderLeft:SetPoint("BOTTOMLEFT", card, "BOTTOMLEFT")
 
-    local leftBorderRight = leftColumnFrame:CreateTexture(nil, "OVERLAY")
-    leftBorderRight:SetWidth(1)
-    leftBorderRight:SetColorTexture(0.4, 0.4, 0.4, 1)
+        local borderRight = card:CreateTexture(nil, "OVERLAY")
+        borderRight:SetWidth(1)
+        borderRight:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderRight:SetPoint("TOPRIGHT", card, "TOPRIGHT")
+        borderRight:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT")
 
-    -- Position borders
-    leftBorderTop:SetPoint("TOPLEFT", leftColumnFrame, "TOPLEFT")
-    leftBorderTop:SetPoint("TOPRIGHT", leftColumnFrame, "TOPRIGHT")
+        return card
+    end
 
-    leftBorderBottom:SetPoint("BOTTOMLEFT", leftColumnFrame, "BOTTOMLEFT")
-    leftBorderBottom:SetPoint("BOTTOMRIGHT", leftColumnFrame, "BOTTOMRIGHT")
+    -- Create bordered cards for each stat section
+    currentXPCard = CreateBorderedCard(self.frame)
+    xpPerHourCard = CreateBorderedCard(self.frame)
+    killsCard = CreateBorderedCard(self.frame)
+    nextLevelCard = CreateBorderedCard(self.frame)
+    timeCard = CreateBorderedCard(self.frame)
 
-    leftBorderLeft:SetPoint("TOPLEFT", leftColumnFrame, "TOPLEFT")
-    leftBorderLeft:SetPoint("BOTTOMLEFT", leftColumnFrame, "BOTTOMLEFT")
-
-    leftBorderRight:SetPoint("TOPRIGHT", leftColumnFrame, "TOPRIGHT")
-    leftBorderRight:SetPoint("BOTTOMRIGHT", leftColumnFrame, "BOTTOMRIGHT")
-
-    -- Right column (KILLS and TIME)
-    rightColumnFrame = CreateFrame("Frame", nil, self.frame)
-    rightColumnFrame:SetFrameLevel(self.frame:GetFrameLevel() + 2)
-
-    -- Create 4 thin border textures as OVERLAY to be visible
-    local rightBorderTop = rightColumnFrame:CreateTexture(nil, "OVERLAY")
-    rightBorderTop:SetHeight(1)
-    rightBorderTop:SetColorTexture(0.4, 0.4, 0.4, 1)
-
-    local rightBorderBottom = rightColumnFrame:CreateTexture(nil, "OVERLAY")
-    rightBorderBottom:SetHeight(1)
-    rightBorderBottom:SetColorTexture(0.4, 0.4, 0.4, 1)
-
-    local rightBorderLeft = rightColumnFrame:CreateTexture(nil, "OVERLAY")
-    rightBorderLeft:SetWidth(1)
-    rightBorderLeft:SetColorTexture(0.4, 0.4, 0.4, 1)
-
-    local rightBorderRight = rightColumnFrame:CreateTexture(nil, "OVERLAY")
-    rightBorderRight:SetWidth(1)
-    rightBorderRight:SetColorTexture(0.4, 0.4, 0.4, 1)
-
-    -- Position borders
-    rightBorderTop:SetPoint("TOPLEFT", rightColumnFrame, "TOPLEFT")
-    rightBorderTop:SetPoint("TOPRIGHT", rightColumnFrame, "TOPRIGHT")
-
-    rightBorderBottom:SetPoint("BOTTOMLEFT", rightColumnFrame, "BOTTOMLEFT")
-    rightBorderBottom:SetPoint("BOTTOMRIGHT", rightColumnFrame, "BOTTOMRIGHT")
-
-    rightBorderLeft:SetPoint("TOPLEFT", rightColumnFrame, "TOPLEFT")
-    rightBorderLeft:SetPoint("BOTTOMLEFT", rightColumnFrame, "BOTTOMLEFT")
-
-    rightBorderRight:SetPoint("TOPRIGHT", rightColumnFrame, "TOPRIGHT")
-    rightBorderRight:SetPoint("BOTTOMRIGHT", rightColumnFrame, "BOTTOMRIGHT")
 
     -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
     local statNumberSize = 36  -- 50% larger (was 24, now 36)
@@ -197,40 +172,59 @@ end
 function XPTracker:UpdateLayout()
     local width = self.width
     local height = self.height
+    local padding = 8
+    local cardPadding = 5
 
-    -- Calculate responsive column positions (50% width each)
+    -- Calculate responsive positions
+    local titleAreaHeight = 30
+    local currentXPHeight = 80
+    local remainingHeight = height - titleAreaHeight - currentXPHeight - (padding * 2)
+
+    -- Current XP card (full width, at top)
+    local currentXPCardY = titleAreaHeight + 5
+    local currentXPCardHeight = currentXPHeight - 10
+    currentXPCard:ClearAllPoints()
+    currentXPCard:SetPoint("TOPLEFT", self.frame, "TOPLEFT", padding, -currentXPCardY)
+    currentXPCard:SetWidth(width - (padding * 2))
+    currentXPCard:SetHeight(currentXPCardHeight)
+
+    -- Calculate stat card dimensions (2x2 grid)
+    local statCardWidth = (width - (padding * 3)) / 2
+    local statCardHeight = (remainingHeight - cardPadding) / 2
+    local statCardsStartY = titleAreaHeight + currentXPHeight + 5
+
+    -- XP/HR card (top left)
+    xpPerHourCard:ClearAllPoints()
+    xpPerHourCard:SetPoint("TOPLEFT", self.frame, "TOPLEFT", padding, -statCardsStartY)
+    xpPerHourCard:SetWidth(statCardWidth)
+    xpPerHourCard:SetHeight(statCardHeight)
+
+    -- KILLS card (top right)
+    killsCard:ClearAllPoints()
+    killsCard:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -padding, -statCardsStartY)
+    killsCard:SetWidth(statCardWidth)
+    killsCard:SetHeight(statCardHeight)
+
+    -- NEXT card (bottom left)
+    nextLevelCard:ClearAllPoints()
+    nextLevelCard:SetPoint("TOPLEFT", self.frame, "TOPLEFT", padding, -(statCardsStartY + statCardHeight + cardPadding))
+    nextLevelCard:SetWidth(statCardWidth)
+    nextLevelCard:SetHeight(statCardHeight)
+
+    -- TIME card (bottom right)
+    timeCard:ClearAllPoints()
+    timeCard:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -padding, -(statCardsStartY + statCardHeight + cardPadding))
+    timeCard:SetWidth(statCardWidth)
+    timeCard:SetHeight(statCardHeight)
+
+    -- Reposition stat text (centered in cards)
+    local statRowSpacing = remainingHeight / 2.5
     local columnWidth = width / 2
     local leftX = -columnWidth / 2
     local rightX = columnWidth / 2
-
-    -- Calculate responsive row positions based on height
-    -- Distribute vertical space: title area + current XP + 2 stat rows + padding
-    local titleAreaHeight = 30
-    local currentXPHeight = 80
-    local remainingHeight = height - titleAreaHeight - currentXPHeight
-    local statRowSpacing = remainingHeight / 2.5
-
     local row2Y = -(titleAreaHeight + currentXPHeight)
     local row3Y = row2Y - statRowSpacing
 
-    -- Position and size column frames
-    local columnPadding = 5
-    local columnTop = titleAreaHeight + currentXPHeight + 10
-    local columnHeight = height - columnTop - 10
-
-    -- Left column frame
-    leftColumnFrame:ClearAllPoints()
-    leftColumnFrame:SetPoint("TOPLEFT", self.frame, "TOPLEFT", columnPadding, -columnTop)
-    leftColumnFrame:SetWidth((columnWidth - (columnPadding * 2)))
-    leftColumnFrame:SetHeight(columnHeight)
-
-    -- Right column frame
-    rightColumnFrame:ClearAllPoints()
-    rightColumnFrame:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -columnPadding, -columnTop)
-    rightColumnFrame:SetWidth((columnWidth - (columnPadding * 2)))
-    rightColumnFrame:SetHeight(columnHeight)
-
-    -- Reposition stat numbers
     xpPerHourText:ClearAllPoints()
     xpPerHourText:SetPoint("TOP", self.frame, "TOP", leftX, row2Y)
 
