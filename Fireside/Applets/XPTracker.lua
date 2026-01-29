@@ -9,6 +9,7 @@ local XPTracker = Fireside.Applet:New("XPTracker", 280, 230, 250, 400, 200, 350)
 -- UI Elements
 local titleText
 local currentXPText
+local currentXPLabel
 local xpPerHourText
 local xpPerHourLabel
 local killsToLevelText
@@ -46,50 +47,40 @@ function XPTracker:OnInitialize()
     currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
 
     -- "CURRENT XP" label (15pt, 25% larger than original 12pt)
-    local currentXPLabel = self:CreateFontString(nil, "OVERLAY", 15, "CENTER", "TOP")
+    currentXPLabel = self:CreateFontString(nil, "OVERLAY", 15, "CENTER", "TOP")
     currentXPLabel:SetPoint("TOP", currentXPText, "BOTTOM", 0, -2)
     currentXPLabel:SetText("CURRENT XP")
 
     -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
     local statNumberSize = 36  -- 50% larger (was 24, now 36)
     local statLabelSize = 13   -- 25% larger (was 10, now 12.5, rounded to 13)
-    local columnWidth = self.width / 2
-    local leftX = -columnWidth / 2
-    local rightX = columnWidth / 2
-    local row2Y = -105
-    local row3Y = -160
 
     -- XP/HR (top left)
     xpPerHourText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
-    xpPerHourText:SetPoint("TOP", self.frame, "TOP", leftX, row2Y)
-
     xpPerHourLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
     xpPerHourLabel:SetPoint("TOP", xpPerHourText, "BOTTOM", 0, -2)
     xpPerHourLabel:SetText("XP/HR")
 
     -- KILLS (top right)
     killsToLevelText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
-    killsToLevelText:SetPoint("TOP", self.frame, "TOP", rightX, row2Y)
-
     killsToLevelLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
     killsToLevelLabel:SetPoint("TOP", killsToLevelText, "BOTTOM", 0, -2)
     killsToLevelLabel:SetText("KILLS")
 
     -- NEXT (bottom left)
     nextLevelText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
-    nextLevelText:SetPoint("TOP", self.frame, "TOP", leftX, row3Y)
-
     nextLevelLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
     nextLevelLabel:SetPoint("TOP", nextLevelText, "BOTTOM", 0, -2)
     nextLevelLabel:SetText("NEXT")
 
     -- TIME (bottom right)
     timeToLevelText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
-    timeToLevelText:SetPoint("TOP", self.frame, "TOP", rightX, row3Y)
-
     timeToLevelLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
     timeToLevelLabel:SetPoint("TOP", timeToLevelText, "BOTTOM", 0, -2)
     timeToLevelLabel:SetText("TIME")
+
+    -- Apply initial layout
+    self:UpdateLayout()
 
     -- Register events
     self.frame:RegisterEvent("PLAYER_XP_UPDATE")
@@ -129,6 +120,45 @@ function XPTracker:OnInitialize()
     self:UpdateKillsToLevel()
     self:UpdateXPPerHour()
     self:UpdateTimeToLevel()
+end
+
+-- Update layout based on current frame size (responsive layout)
+function XPTracker:UpdateLayout()
+    local width = self.width
+    local height = self.height
+
+    -- Calculate responsive column positions (50% width each)
+    local columnWidth = width / 2
+    local leftX = -columnWidth / 2
+    local rightX = columnWidth / 2
+
+    -- Calculate responsive row positions based on height
+    -- Distribute vertical space: title area + current XP + 2 stat rows + padding
+    local titleAreaHeight = 30
+    local currentXPHeight = 80
+    local remainingHeight = height - titleAreaHeight - currentXPHeight
+    local statRowSpacing = remainingHeight / 2.5
+
+    local row2Y = -(titleAreaHeight + currentXPHeight)
+    local row3Y = row2Y - statRowSpacing
+
+    -- Reposition stat numbers
+    xpPerHourText:ClearAllPoints()
+    xpPerHourText:SetPoint("TOP", self.frame, "TOP", leftX, row2Y)
+
+    killsToLevelText:ClearAllPoints()
+    killsToLevelText:SetPoint("TOP", self.frame, "TOP", rightX, row2Y)
+
+    nextLevelText:ClearAllPoints()
+    nextLevelText:SetPoint("TOP", self.frame, "TOP", leftX, row3Y)
+
+    timeToLevelText:ClearAllPoints()
+    timeToLevelText:SetPoint("TOP", self.frame, "TOP", rightX, row3Y)
+end
+
+-- Handle frame resize
+function XPTracker:OnResize(width, height)
+    self:UpdateLayout()
 end
 
 -- Update current XP percentage
