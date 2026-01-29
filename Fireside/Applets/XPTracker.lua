@@ -4,7 +4,8 @@
 Fireside = Fireside or {}
 
 -- Create XP Tracker applet instance (name, width, height, minWidth, maxWidth, minHeight, maxHeight)
-local XPTracker = Fireside.Applet:New("XPTracker", 280, 250, 250, 400, 220, 370)
+-- Dimensions reduced proportionally due to 20% smaller text
+local XPTracker = Fireside.Applet:New("XPTracker", 280, 220, 250, 400, 180, 320)
 
 -- UI Elements
 local titleText
@@ -39,15 +40,15 @@ function XPTracker:OnInitialize()
         lastKillXP = saved.sessionData.lastKillXP or 0
     end
 
-    -- Title: Fireside heading
-    titleText = self:CreateFontString(nil, "OVERLAY", 14, "CENTER", "TOP")
+    -- Title: Fireside heading (reduced by 20%: 14pt → 11pt)
+    titleText = self:CreateFontString(nil, "OVERLAY", 11, "CENTER", "TOP")
     titleText:SetPoint("TOP", self.frame, "TOP", 0, -8)
     titleText:SetText("Fireside")
     titleText:SetTextColor(1, 0.82, 0, 1)
 
     -- Current XP Section (centered, large)
-    -- XP percentage number (doubled size: 48pt)
-    currentXPText = self:CreateFontString(nil, "OVERLAY", 48, "CENTER", "TOP")
+    -- XP percentage number (reduced by 20%: 48pt → 38pt)
+    currentXPText = self:CreateFontString(nil, "OVERLAY", 38, "CENTER", "TOP")
     currentXPText:SetPoint("TOP", self.frame, "TOP", 0, -30)
     currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
 
@@ -98,8 +99,8 @@ function XPTracker:OnInitialize()
 
 
     -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
-    local statNumberSize = 36  -- 50% larger (was 24, now 36)
-    local statLabelSize = 13   -- 25% larger (was 10, now 12.5, rounded to 13)
+    local statNumberSize = 29  -- Reduced by 20% from 36pt
+    local statLabelSize = 13   -- Keep subheading size unchanged
 
     -- XP/HR (top left)
     xpPerHourText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
