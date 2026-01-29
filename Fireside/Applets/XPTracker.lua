@@ -120,14 +120,14 @@ function XPTracker:OnInitialize()
     xpBarBg:SetColorTexture(0.05, 0.05, 0.3, 1.0)  -- Darker blue
     xpBarBg:SetHeight(10)
 
-    -- Create rested XP bar (middle layer - light blue, rested XP percentage)
+    -- Create rested XP bar (middle layer - light blue at 25% opacity, rested XP percentage)
     xpBarRested = currentXPCard:CreateTexture(nil, "ARTWORK")
-    xpBarRested:SetColorTexture(0.3, 0.5, 0.9, 1.0)  -- Light blue
+    xpBarRested:SetColorTexture(0.3, 0.5, 0.9, 0.25)  -- Light blue, 25% opacity
     xpBarRested:SetHeight(10)
 
-    -- Create current XP bar (foreground - orange, current XP percentage)
+    -- Create current XP bar (foreground - light blue, current XP percentage)
     xpBarFg = currentXPCard:CreateTexture(nil, "OVERLAY")
-    xpBarFg:SetColorTexture(1.0, 0.251, 0.0, 1.0)  -- Orange (frame border color)
+    xpBarFg:SetColorTexture(0.3, 0.5, 0.9, 1.0)  -- Light blue, full opacity
     xpBarFg:SetHeight(10)
 
     -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
