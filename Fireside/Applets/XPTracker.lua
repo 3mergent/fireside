@@ -41,13 +41,15 @@ function XPTracker:OnInitialize()
         lastKillXP = saved.sessionData.lastKillXP or 0
     end
 
-    -- Logo on the left (15% of frame width, ~25px)
-    local logoSize = math.floor(self.width * 0.15)
+    -- Logo on the left (30% of frame width, doubled size, floats over edge)
+    local logoSize = math.floor(self.width * 0.30)
     logoTexture = self.frame:CreateTexture(nil, "ARTWORK")
     logoTexture:SetTexture("Interface\\AddOns\\Fireside\\Images\\fireside-logo.png")
     logoTexture:SetWidth(logoSize)
     logoTexture:SetHeight(logoSize)
-    logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 5, -5)
+    -- Position to float up by half its height: -5 + (logoSize / 2)
+    local logoYOffset = math.floor(logoSize / 2) - 5
+    logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 5, logoYOffset)
 
     -- Title: Fireside XP Tracker heading (right side, reduced by 20%: 14pt → 11pt)
     titleText = self:CreateFontString(nil, "OVERLAY", 11, "RIGHT", "TOP")
@@ -185,11 +187,15 @@ function XPTracker:UpdateLayout()
     local padding = 5  -- Uniform 5px spacing everywhere
     local cardPadding = 5
 
-    -- Update logo size (15% of frame width)
-    local logoSize = math.floor(width * 0.15)
+    -- Update logo size and position (30% of frame width, floats over edge)
+    local logoSize = math.floor(width * 0.30)
     if logoTexture then
         logoTexture:SetWidth(logoSize)
         logoTexture:SetHeight(logoSize)
+        -- Reposition to float up by half its height
+        local logoYOffset = math.floor(logoSize / 2) - 5
+        logoTexture:ClearAllPoints()
+        logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 5, logoYOffset)
     end
 
     -- Calculate responsive positions
