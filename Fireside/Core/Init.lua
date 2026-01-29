@@ -80,6 +80,14 @@ local function SlashCommandHandler(msg)
         Fireside.Dashboard:ResetAllPositions()
 
     elseif command == "list" then
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard type: " .. type(Fireside.Dashboard), 1, 1, 0)
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard.applets type: " .. type(Fireside.Dashboard.applets), 1, 1, 0)
+        local count = 0
+        for k, v in pairs(Fireside.Dashboard.applets) do
+            count = count + 1
+            DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Found applet in table: " .. tostring(k), 1, 1, 0)
+        end
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Total applets in table: " .. count, 1, 1, 0)
         Fireside.Dashboard:ListApplets()
 
     elseif command == "enable" and arg and arg ~= "" then
@@ -87,6 +95,22 @@ local function SlashCommandHandler(msg)
 
     elseif command == "disable" and arg and arg ~= "" then
         Fireside.Dashboard:DisableApplet(arg)
+
+    elseif command == "debug" then
+        DEFAULT_CHAT_FRAME:AddMessage("=== FIRESIDE DEBUG INFO ===", 1, 1, 0)
+        DEFAULT_CHAT_FRAME:AddMessage("Dashboard exists: " .. tostring(Fireside.Dashboard ~= nil), 1, 1, 1)
+        DEFAULT_CHAT_FRAME:AddMessage("Dashboard.applets type: " .. type(Fireside.Dashboard.applets), 1, 1, 1)
+        local count = 0
+        for k, v in pairs(Fireside.Dashboard.applets) do
+            count = count + 1
+            DEFAULT_CHAT_FRAME:AddMessage("  Applet: " .. tostring(k) .. " = " .. tostring(v), 1, 1, 1)
+        end
+        DEFAULT_CHAT_FRAME:AddMessage("Total applets: " .. count, 1, 1, 1)
+        DEFAULT_CHAT_FRAME:AddMessage("FiresideDB exists: " .. tostring(FiresideDB ~= nil), 1, 1, 1)
+
+    elseif command == "init" then
+        DEFAULT_CHAT_FRAME:AddMessage("Manually triggering Dashboard:Initialize()...", 1, 1, 0)
+        Fireside.Dashboard:Initialize()
 
     else
         DEFAULT_CHAT_FRAME:AddMessage("Fireside: Unknown command. Type /fireside help for commands.", 1, 0, 0)
