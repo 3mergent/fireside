@@ -178,7 +178,6 @@ function XPTracker:UpdateLayout()
     -- Calculate responsive positions
     local titleAreaHeight = 30
     local currentXPHeight = 80
-    local remainingHeight = height - titleAreaHeight - currentXPHeight - (padding * 2)
 
     -- Current XP card (full width, at top) with 10px padding top and bottom
     local currentXPCardY = titleAreaHeight + 5
@@ -189,9 +188,10 @@ function XPTracker:UpdateLayout()
     currentXPCard:SetHeight(currentXPCardHeight)
 
     -- Calculate stat card dimensions (2x2 grid)
+    local statCardsStartY = titleAreaHeight + currentXPHeight + 25  -- Moved down 20px to account for taller Current XP card
+    local remainingHeight = height - statCardsStartY - padding  -- Calculate based on actual start position
     local statCardWidth = (width - (padding * 3)) / 2
     local statCardHeight = (remainingHeight - cardPadding) / 2
-    local statCardsStartY = titleAreaHeight + currentXPHeight + 25  -- Moved down 20px to account for taller Current XP card
 
     -- XP/HR card (top left)
     xpPerHourCard:ClearAllPoints()
