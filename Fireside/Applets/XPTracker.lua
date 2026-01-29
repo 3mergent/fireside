@@ -180,9 +180,9 @@ function XPTracker:UpdateLayout()
     local currentXPHeight = 80
     local remainingHeight = height - titleAreaHeight - currentXPHeight - (padding * 2)
 
-    -- Current XP card (full width, at top)
+    -- Current XP card (full width, at top) with 10px padding top and bottom
     local currentXPCardY = titleAreaHeight + 5
-    local currentXPCardHeight = currentXPHeight - 10
+    local currentXPCardHeight = currentXPHeight + 10  -- Add 20px total (10 top + 10 bottom)
     currentXPCard:ClearAllPoints()
     currentXPCard:SetPoint("TOPLEFT", self.frame, "TOPLEFT", padding, -currentXPCardY)
     currentXPCard:SetWidth(width - (padding * 2))
