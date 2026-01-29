@@ -1,7 +1,7 @@
 ## Interface: 20505
 ## Title: Fireside
 ## Notes: Modular dashboard system with draggable applets
-## Author: YourName
+## Author: 3mergent
 ## Version: 1.0.0
 ## SavedVariables: FiresideDB
 
