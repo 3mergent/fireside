@@ -33,6 +33,8 @@ local xpSamples = {}
 local lastKillXP = 0
 local maxSamples = 60
 local updateInterval = 1.0
+local levelUpTime = 0  -- Timestamp of last level up
+local levelUpDuration = 300  -- 5 minutes in seconds
 
 -- Initialize UI
 function XPTracker:OnInitialize()
@@ -41,6 +43,7 @@ function XPTracker:OnInitialize()
     if saved and saved.sessionData then
         xpSamples = saved.sessionData.xpSamples or {}
         lastKillXP = saved.sessionData.lastKillXP or 0
+        levelUpTime = saved.sessionData.levelUpTime or 0
     end
 
     -- Logo on the left (36% of frame width, increased by 20%, floats over edge)
@@ -313,6 +316,22 @@ function XPTracker:UpdateCurrentXP()
 
     currentXPText:SetText(string.format("%.1f%%", percentage))
 
+    -- Check if we recently leveled up (within 5 minutes)
+    local timeSinceLevelUp = time() - levelUpTime
+    local isRecentLevelUp = levelUpTime > 0 and timeSinceLevelUp < levelUpDuration
+
+    if isRecentLevelUp then
+        -- Level up celebration mode
+        currentXPText:SetTextColor(0, 1, 0, 1)  -- Green
+        currentXPLabel:SetText("LEVELED UP!")
+        currentXPLabel:SetTextColor(0, 1, 0, 1)  -- Green
+    else
+        -- Normal mode
+        currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
+        currentXPLabel:SetText("CURRENT XP")
+        currentXPLabel:SetTextColor(1, 1, 1, 1)  -- White
+    end
+
     -- Update XP bar foreground width based on percentage
     local cardPadding = 5
     local availableWidth = currentXPCard:GetWidth() - (cardPadding * 2)
@@ -440,6 +459,10 @@ function XPTracker:OnLevelUp()
     -- Clear XP samples on level up
     xpSamples = {}
     lastKillXP = 0
+
+    -- Record level up time for celebration display
+    levelUpTime = time()
+
     self:UpdateNextLevel()
     self:UpdateCurrentXP()
     self:UpdateKillsToLevel()
@@ -455,7 +478,8 @@ function XPTracker:SaveSessionData()
 
     FiresideDB.applets[self.name].sessionData = {
         xpSamples = xpSamples,
-        lastKillXP = lastKillXP
+        lastKillXP = lastKillXP,
+        levelUpTime = levelUpTime
     }
 end
 
