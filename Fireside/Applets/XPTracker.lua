@@ -70,8 +70,8 @@ function XPTracker:OnInitialize()
     titleText:SetTextColor(1, 0.82, 0, 1)
 
     -- Current XP Section (centered, large)
-    -- XP percentage number (reduced by 20%: 48pt → 38pt)
-    currentXPText = self:CreateFontString(nil, "OVERLAY", 38, "CENTER", "TOP")
+    -- XP percentage number (38pt increased by 15% → 44pt)
+    currentXPText = self:CreateFontString(nil, "OVERLAY", 44, "CENTER", "TOP")
     currentXPText:SetPoint("TOP", self.frame, "TOP", 0, -10)
     currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
 
