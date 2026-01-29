@@ -267,7 +267,7 @@ function XPTracker:UpdateLayout()
 
     -- Current XP number - positioned near top with reduced spacing
     currentXPText:ClearAllPoints()
-    currentXPText:SetPoint("TOP", currentXPCard, "TOP", 0, -6)
+    currentXPText:SetPoint("TOP", currentXPCard, "TOP", 0, -15)
 
     -- XP/HR number - offset up for visual balance
     xpPerHourText:ClearAllPoints()
