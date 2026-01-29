@@ -4,7 +4,7 @@
 Fireside = Fireside or {}
 
 -- Create XP Tracker applet instance
-local XPTracker = Fireside.Applet:New("XPTracker", 280, 140)
+local XPTracker = Fireside.Applet:New("XPTracker", 280, 180)
 
 -- UI Elements
 local titleText
@@ -39,45 +39,57 @@ function XPTracker:OnInitialize()
     titleText:SetText("Fireside")
     titleText:SetTextColor(1, 0.82, 0, 1)
 
-    -- Row 1: Current XP (large, centered, spans full width)
-    currentXPText = self:CreateFontString(nil, "OVERLAY", 24, "CENTER", "TOP")
+    -- Current XP Section (centered, large)
+    -- XP percentage number (doubled size: 48pt)
+    currentXPText = self:CreateFontString(nil, "OVERLAY", 48, "CENTER", "TOP")
     currentXPText:SetPoint("TOP", self.frame, "TOP", 0, -30)
-    currentXPText:SetWidth(self.width - 20)
-    currentXPText:SetTextColor(1, 1, 0, 1)
+    currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
 
-    -- Row 2: XP/hr (left) and Kills (right)
-    xpPerHourLabel = self:CreateFontString(nil, "OVERLAY", 10, "LEFT", "TOP")
-    xpPerHourLabel:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 10, -65)
-    xpPerHourLabel:SetText("XP/hr:")
+    -- "CURRENT XP" label (12pt, below number)
+    local currentXPLabel = self:CreateFontString(nil, "OVERLAY", 12, "CENTER", "TOP")
+    currentXPLabel:SetPoint("TOP", currentXPText, "BOTTOM", 0, -2)
+    currentXPLabel:SetText("CURRENT XP")
 
-    xpPerHourText = self:CreateFontString(nil, "OVERLAY", 14, "RIGHT", "TOP")
-    xpPerHourText:SetPoint("TOPRIGHT", self.frame, "TOP", -5, -65)
-    xpPerHourText:SetWidth((self.width / 2) - 15)
+    -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
+    local statNumberSize = 24  -- Half of current XP size
+    local statLabelSize = 10
+    local columnWidth = self.width / 2
+    local leftX = -columnWidth / 2
+    local rightX = columnWidth / 2
+    local row2Y = -100
+    local row3Y = -145
 
-    killsToLevelLabel = self:CreateFontString(nil, "OVERLAY", 10, "LEFT", "TOP")
-    killsToLevelLabel:SetPoint("TOPLEFT", self.frame, "TOP", 5, -65)
-    killsToLevelLabel:SetText("Kills:")
+    -- XP/HR (top left)
+    xpPerHourText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
+    xpPerHourText:SetPoint("TOP", self.frame, "TOP", leftX, row2Y)
 
-    killsToLevelText = self:CreateFontString(nil, "OVERLAY", 14, "RIGHT", "TOP")
-    killsToLevelText:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -10, -65)
-    killsToLevelText:SetWidth((self.width / 2) - 15)
+    xpPerHourLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
+    xpPerHourLabel:SetPoint("TOP", xpPerHourText, "BOTTOM", 0, -2)
+    xpPerHourLabel:SetText("XP/HR")
 
-    -- Row 3: Next level (left) and Time to level (right)
-    nextLevelLabel = self:CreateFontString(nil, "OVERLAY", 10, "LEFT", "TOP")
-    nextLevelLabel:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 10, -95)
-    nextLevelLabel:SetText("Next:")
+    -- KILLS (top right)
+    killsToLevelText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
+    killsToLevelText:SetPoint("TOP", self.frame, "TOP", rightX, row2Y)
 
-    nextLevelText = self:CreateFontString(nil, "OVERLAY", 14, "RIGHT", "TOP")
-    nextLevelText:SetPoint("TOPRIGHT", self.frame, "TOP", -5, -95)
-    nextLevelText:SetWidth((self.width / 2) - 15)
+    killsToLevelLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
+    killsToLevelLabel:SetPoint("TOP", killsToLevelText, "BOTTOM", 0, -2)
+    killsToLevelLabel:SetText("KILLS")
 
-    timeToLevelLabel = self:CreateFontString(nil, "OVERLAY", 10, "LEFT", "TOP")
-    timeToLevelLabel:SetPoint("TOPLEFT", self.frame, "TOP", 5, -95)
-    timeToLevelLabel:SetText("Time:")
+    -- NEXT (bottom left)
+    nextLevelText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
+    nextLevelText:SetPoint("TOP", self.frame, "TOP", leftX, row3Y)
 
-    timeToLevelText = self:CreateFontString(nil, "OVERLAY", 14, "RIGHT", "TOP")
-    timeToLevelText:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -10, -95)
-    timeToLevelText:SetWidth((self.width / 2) - 15)
+    nextLevelLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
+    nextLevelLabel:SetPoint("TOP", nextLevelText, "BOTTOM", 0, -2)
+    nextLevelLabel:SetText("NEXT")
+
+    -- TIME (bottom right)
+    timeToLevelText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
+    timeToLevelText:SetPoint("TOP", self.frame, "TOP", rightX, row3Y)
+
+    timeToLevelLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
+    timeToLevelLabel:SetPoint("TOP", timeToLevelText, "BOTTOM", 0, -2)
+    timeToLevelLabel:SetText("TIME")
 
     -- Register events
     self.frame:RegisterEvent("PLAYER_XP_UPDATE")
@@ -129,7 +141,7 @@ function XPTracker:UpdateCurrentXP()
         percentage = (currentXP / maxXP) * 100
     end
 
-    currentXPText:SetText(string.format("Current XP: %.1f%%", percentage))
+    currentXPText:SetText(string.format("%.1f%%", percentage))
 end
 
 -- Record XP sample for rate calculation
