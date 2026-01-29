@@ -4,8 +4,8 @@
 Fireside = Fireside or {}
 
 -- Create XP Tracker applet instance (name, width, height, minWidth, maxWidth, minHeight, maxHeight)
--- Compact width, flexible height range
-local XPTracker = Fireside.Applet:New("XPTracker", 168, 256, 150, 240, 256, 384)
+-- Compact width, flexible height range (added 15px for XP bar)
+local XPTracker = Fireside.Applet:New("XPTracker", 168, 271, 150, 240, 271, 399)
 
 -- UI Elements
 local logoTexture
@@ -13,6 +13,8 @@ local titleText
 local currentXPText
 local currentXPLabel
 local currentXPCard
+local xpBarBg
+local xpBarFg
 local xpPerHourCard
 local killsCard
 local nextLevelCard
@@ -47,9 +49,10 @@ function XPTracker:OnInitialize()
     logoTexture:SetTexture("Interface\\AddOns\\Fireside\\Images\\fireside-logo.png")
     logoTexture:SetWidth(logoSize)
     logoTexture:SetHeight(logoSize)
-    -- Position to float up by half its height: -5 + (logoSize / 2)
+    -- Position to float up by half its height and left by 25% of its width
+    local logoXOffset = 5 - math.floor(logoSize * 0.25)
     local logoYOffset = math.floor(logoSize / 2) - 5
-    logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 5, logoYOffset)
+    logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", logoXOffset, logoYOffset)
 
     -- Title: Fireside XP Tracker heading (right side, reduced by 20%: 14pt → 11pt)
     titleText = self:CreateFontString(nil, "OVERLAY", 11, "RIGHT", "TOP")
@@ -108,6 +111,15 @@ function XPTracker:OnInitialize()
     nextLevelCard = CreateBorderedCard(self.frame)
     timeCard = CreateBorderedCard(self.frame)
 
+    -- Create XP bar (background - dark blue, static)
+    xpBarBg = currentXPCard:CreateTexture(nil, "BORDER")
+    xpBarBg:SetColorTexture(0.1, 0.1, 0.5, 1.0)  -- Dark blue
+    xpBarBg:SetHeight(10)
+
+    -- Create XP bar (foreground - lighter blue, percentage-based width)
+    xpBarFg = currentXPCard:CreateTexture(nil, "ARTWORK")
+    xpBarFg:SetColorTexture(0.3, 0.5, 0.9, 1.0)  -- Light blue (almost primary)
+    xpBarFg:SetHeight(10)
 
     -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
     local statNumberSize = 29  -- Reduced by 20% from 36pt
@@ -187,28 +199,37 @@ function XPTracker:UpdateLayout()
     local padding = 5  -- Uniform 5px spacing everywhere
     local cardPadding = 5
 
-    -- Update logo size and position (30% of frame width, floats over edge)
+    -- Update logo size and position (30% of frame width, floats over edges)
     local logoSize = math.floor(width * 0.30)
     if logoTexture then
         logoTexture:SetWidth(logoSize)
         logoTexture:SetHeight(logoSize)
-        -- Reposition to float up by half its height
+        -- Reposition to float up by half its height and left by 25% of its width
+        local logoXOffset = 5 - math.floor(logoSize * 0.25)
         local logoYOffset = math.floor(logoSize / 2) - 5
         logoTexture:ClearAllPoints()
-        logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 5, logoYOffset)
+        logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", logoXOffset, logoYOffset)
     end
 
     -- Calculate responsive positions
     local titleAreaHeight = 30
     local currentXPHeight = 80
 
-    -- Current XP card (full width, at top) with 10px padding top and bottom
+    -- Current XP card (full width, at top) with 10px padding top and bottom, plus space for XP bar
     local currentXPCardY = titleAreaHeight + 5
-    local currentXPCardHeight = currentXPHeight + 10  -- Add 20px total (10 top + 10 bottom)
+    local currentXPCardHeight = currentXPHeight + 10 + 10 + 5  -- 10px top padding + 10px bar + 5px bar padding
     currentXPCard:ClearAllPoints()
     currentXPCard:SetPoint("TOPLEFT", self.frame, "TOPLEFT", padding, -currentXPCardY)
     currentXPCard:SetWidth(width - (padding * 2))
     currentXPCard:SetHeight(currentXPCardHeight)
+
+    -- Position XP bars at bottom of current XP card
+    xpBarBg:ClearAllPoints()
+    xpBarBg:SetPoint("BOTTOMLEFT", currentXPCard, "BOTTOMLEFT", cardPadding, cardPadding)
+    xpBarBg:SetPoint("BOTTOMRIGHT", currentXPCard, "BOTTOMRIGHT", -cardPadding, cardPadding)
+
+    xpBarFg:ClearAllPoints()
+    xpBarFg:SetPoint("BOTTOMLEFT", currentXPCard, "BOTTOMLEFT", cardPadding, cardPadding)
 
     -- Calculate stat card dimensions (2x2 grid) - 5px gap from Current XP card
     local currentXPCardEndY = currentXPCardY + currentXPCardHeight
@@ -281,6 +302,12 @@ function XPTracker:UpdateCurrentXP()
     end
 
     currentXPText:SetText(string.format("%.1f%%", percentage))
+
+    -- Update XP bar foreground width based on percentage
+    local cardPadding = 5
+    local availableWidth = currentXPCard:GetWidth() - (cardPadding * 2)
+    local barWidth = availableWidth * (percentage / 100)
+    xpBarFg:SetWidth(barWidth)
 end
 
 -- Record XP sample for rate calculation
