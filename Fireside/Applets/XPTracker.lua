@@ -43,14 +43,14 @@ function XPTracker:OnInitialize()
         lastKillXP = saved.sessionData.lastKillXP or 0
     end
 
-    -- Logo on the left (30% of frame width, doubled size, floats over edge)
-    local logoSize = math.floor(self.width * 0.30)
+    -- Logo on the left (36% of frame width, increased by 20%, floats over edge)
+    local logoSize = math.floor(self.width * 0.36)
     logoTexture = self.frame:CreateTexture(nil, "ARTWORK")
     logoTexture:SetTexture("Interface\\AddOns\\Fireside\\Images\\fireside-logo.png")
     logoTexture:SetWidth(logoSize)
     logoTexture:SetHeight(logoSize)
-    -- Position to float up by half its height and left by 25% of its width
-    local logoXOffset = 5 - math.floor(logoSize * 0.25)
+    -- Position to float up by half its height and moved right 5px
+    local logoXOffset = 10 - math.floor(logoSize * 0.25)
     local logoYOffset = math.floor(logoSize / 2) - 5
     logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", logoXOffset, logoYOffset)
 
@@ -63,7 +63,7 @@ function XPTracker:OnInitialize()
     -- Current XP Section (centered, large)
     -- XP percentage number (reduced by 20%: 48pt → 38pt)
     currentXPText = self:CreateFontString(nil, "OVERLAY", 38, "CENTER", "TOP")
-    currentXPText:SetPoint("TOP", self.frame, "TOP", 0, -30)
+    currentXPText:SetPoint("TOP", self.frame, "TOP", 0, -10)
     currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
 
     -- "CURRENT XP" label (15pt, 25% larger than original 12pt)
@@ -79,25 +79,25 @@ function XPTracker:OnInitialize()
         -- Create 4 border edges
         local borderTop = card:CreateTexture(nil, "OVERLAY")
         borderTop:SetHeight(1)
-        borderTop:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderTop:SetColorTexture(0.2, 0.2, 0.2, 1)
         borderTop:SetPoint("TOPLEFT", card, "TOPLEFT")
         borderTop:SetPoint("TOPRIGHT", card, "TOPRIGHT")
 
         local borderBottom = card:CreateTexture(nil, "OVERLAY")
         borderBottom:SetHeight(1)
-        borderBottom:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderBottom:SetColorTexture(0.2, 0.2, 0.2, 1)
         borderBottom:SetPoint("BOTTOMLEFT", card, "BOTTOMLEFT")
         borderBottom:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT")
 
         local borderLeft = card:CreateTexture(nil, "OVERLAY")
         borderLeft:SetWidth(1)
-        borderLeft:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderLeft:SetColorTexture(0.2, 0.2, 0.2, 1)
         borderLeft:SetPoint("TOPLEFT", card, "TOPLEFT")
         borderLeft:SetPoint("BOTTOMLEFT", card, "BOTTOMLEFT")
 
         local borderRight = card:CreateTexture(nil, "OVERLAY")
         borderRight:SetWidth(1)
-        borderRight:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderRight:SetColorTexture(0.2, 0.2, 0.2, 1)
         borderRight:SetPoint("TOPRIGHT", card, "TOPRIGHT")
         borderRight:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT")
 
@@ -199,13 +199,13 @@ function XPTracker:UpdateLayout()
     local padding = 5  -- Uniform 5px spacing everywhere
     local cardPadding = 5
 
-    -- Update logo size and position (30% of frame width, floats over edges)
-    local logoSize = math.floor(width * 0.30)
+    -- Update logo size and position (36% of frame width, increased by 20%, floats over edges)
+    local logoSize = math.floor(width * 0.36)
     if logoTexture then
         logoTexture:SetWidth(logoSize)
         logoTexture:SetHeight(logoSize)
-        -- Reposition to float up by half its height and left by 25% of its width
-        local logoXOffset = 5 - math.floor(logoSize * 0.25)
+        -- Reposition to float up by half its height and moved right 5px
+        local logoXOffset = 10 - math.floor(logoSize * 0.25)
         local logoYOffset = math.floor(logoSize / 2) - 5
         logoTexture:ClearAllPoints()
         logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", logoXOffset, logoYOffset)
