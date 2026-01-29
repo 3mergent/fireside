@@ -10,6 +10,8 @@ local XPTracker = Fireside.Applet:New("XPTracker", 280, 230, 250, 400, 200, 350)
 local titleText
 local currentXPText
 local currentXPLabel
+local leftColumnFrame
+local rightColumnFrame
 local xpPerHourText
 local xpPerHourLabel
 local killsToLevelText
@@ -50,6 +52,33 @@ function XPTracker:OnInitialize()
     currentXPLabel = self:CreateFontString(nil, "OVERLAY", 15, "CENTER", "TOP")
     currentXPLabel:SetPoint("TOP", currentXPText, "BOTTOM", 0, -2)
     currentXPLabel:SetText("CURRENT XP")
+
+    -- Create column container frames with borders
+    -- Left column (XP/HR and NEXT)
+    leftColumnFrame = CreateFrame("Frame", nil, self.frame)
+    leftColumnFrame:SetFrameLevel(self.frame:GetFrameLevel() + 1)
+
+    local leftBorder = leftColumnFrame:CreateTexture(nil, "BACKGROUND")
+    leftBorder:SetAllPoints(leftColumnFrame)
+    leftBorder:SetColorTexture(0.3, 0.3, 0.3, 1)  -- Dark gray border
+
+    local leftBg = leftColumnFrame:CreateTexture(nil, "BORDER")
+    leftBg:SetPoint("TOPLEFT", leftColumnFrame, "TOPLEFT", 1, -1)
+    leftBg:SetPoint("BOTTOMRIGHT", leftColumnFrame, "BOTTOMRIGHT", -1, 1)
+    leftBg:SetColorTexture(0, 0, 0, 0)  -- Transparent inside
+
+    -- Right column (KILLS and TIME)
+    rightColumnFrame = CreateFrame("Frame", nil, self.frame)
+    rightColumnFrame:SetFrameLevel(self.frame:GetFrameLevel() + 1)
+
+    local rightBorder = rightColumnFrame:CreateTexture(nil, "BACKGROUND")
+    rightBorder:SetAllPoints(rightColumnFrame)
+    rightBorder:SetColorTexture(0.3, 0.3, 0.3, 1)  -- Dark gray border
+
+    local rightBg = rightColumnFrame:CreateTexture(nil, "BORDER")
+    rightBg:SetPoint("TOPLEFT", rightColumnFrame, "TOPLEFT", 1, -1)
+    rightBg:SetPoint("BOTTOMRIGHT", rightColumnFrame, "BOTTOMRIGHT", -1, 1)
+    rightBg:SetColorTexture(0, 0, 0, 0)  -- Transparent inside
 
     -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
     local statNumberSize = 36  -- 50% larger (was 24, now 36)
@@ -141,6 +170,23 @@ function XPTracker:UpdateLayout()
 
     local row2Y = -(titleAreaHeight + currentXPHeight)
     local row3Y = row2Y - statRowSpacing
+
+    -- Position and size column frames
+    local columnPadding = 5
+    local columnTop = titleAreaHeight + currentXPHeight + 10
+    local columnHeight = height - columnTop - 10
+
+    -- Left column frame
+    leftColumnFrame:ClearAllPoints()
+    leftColumnFrame:SetPoint("TOPLEFT", self.frame, "TOPLEFT", columnPadding, -columnTop)
+    leftColumnFrame:SetWidth((columnWidth - (columnPadding * 2)))
+    leftColumnFrame:SetHeight(columnHeight)
+
+    -- Right column frame
+    rightColumnFrame:ClearAllPoints()
+    rightColumnFrame:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -columnPadding, -columnTop)
+    rightColumnFrame:SetWidth((columnWidth - (columnPadding * 2)))
+    rightColumnFrame:SetHeight(columnHeight)
 
     -- Reposition stat numbers
     xpPerHourText:ClearAllPoints()
