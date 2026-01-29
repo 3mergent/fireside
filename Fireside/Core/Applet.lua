@@ -6,12 +6,17 @@ Fireside.Applet = {}
 Fireside.Applet.__index = Fireside.Applet
 
 -- Create a new applet instance
-function Fireside.Applet:New(name, width, height)
+function Fireside.Applet:New(name, width, height, minWidth, maxWidth, minHeight, maxHeight)
     local applet = setmetatable({}, self)
     applet.name = name
     applet.width = width or 200
     applet.height = height or 100
+    applet.minWidth = minWidth or 200
+    applet.maxWidth = maxWidth or 400
+    applet.minHeight = minHeight or 150
+    applet.maxHeight = maxHeight or 300
     applet.frame = nil
+    applet.resizeHandle = nil
     applet.initialized = false
     return applet
 end
@@ -41,6 +46,19 @@ function Fireside.Applet:Initialize()
     border:SetAllPoints(self.frame)
     border:SetColorTexture(0, 0, 0, 1.0)  -- Black border, fully opaque
 
+    -- Create resize handle in bottom right corner
+    self.resizeHandle = CreateFrame("Frame", nil, self.frame)
+    self.resizeHandle:SetWidth(16)
+    self.resizeHandle:SetHeight(16)
+    self.resizeHandle:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", 0, 0)
+    self.resizeHandle:EnableMouse(true)
+    self.resizeHandle:SetFrameLevel(self.frame:GetFrameLevel() + 1)
+
+    -- Resize handle texture (small arrow/grip)
+    local resizeTexture = self.resizeHandle:CreateTexture(nil, "OVERLAY")
+    resizeTexture:SetAllPoints(self.resizeHandle)
+    resizeTexture:SetColorTexture(0.5, 0.5, 0.5, 0.8)  -- Gray, semi-transparent
+
     -- Dragging functionality
     local applet = self  -- Capture self for closures
 
@@ -55,8 +73,51 @@ function Fireside.Applet:Initialize()
         applet:SavePosition()
     end)
 
+    -- Resize handle drag handlers
+    self.resizeHandle:SetScript("OnMouseDown", function(self, button)
+        if button == "LeftButton" and not applet:IsLocked() then
+            applet.frame:StartSizing("BOTTOMRIGHT")
+            applet.isResizing = true
+        end
+    end)
+
+    self.resizeHandle:SetScript("OnMouseUp", function(self, button)
+        if button == "LeftButton" and applet.isResizing then
+            applet.frame:StopMovingOrSizing()
+            applet.isResizing = false
+
+            -- Clamp size to min/max
+            local width = applet.frame:GetWidth()
+            local height = applet.frame:GetHeight()
+
+            if width < applet.minWidth then width = applet.minWidth end
+            if width > applet.maxWidth then width = applet.maxWidth end
+            if height < applet.minHeight then height = applet.minHeight end
+            if height > applet.maxHeight then height = applet.maxHeight end
+
+            applet.frame:SetWidth(width)
+            applet.frame:SetHeight(height)
+            applet.width = width
+            applet.height = height
+
+            applet:SaveSize()
+            applet:OnResize(width, height)
+        end
+    end)
+
+    -- Enable resizing
+    self.frame:SetResizable(true)
+    self.frame:SetMinResize(self.minWidth, self.minHeight)
+    self.frame:SetMaxResize(self.maxWidth, self.maxHeight)
+
     -- Load saved position or center on screen
     self:LoadPosition()
+    self:LoadSize()
+
+    -- Hide resize handle initially (will be shown on unlock)
+    if self.resizeHandle then
+        self.resizeHandle:Hide()
+    end
 
     self.initialized = true
     self:OnInitialize()
@@ -92,17 +153,23 @@ function Fireside.Applet:Toggle()
     end
 end
 
--- Lock the applet (prevent dragging)
+-- Lock the applet (prevent dragging and hide resize handle)
 function Fireside.Applet:Lock()
     if self.frame then
         self.frame:RegisterForDrag()
     end
+    if self.resizeHandle then
+        self.resizeHandle:Hide()
+    end
 end
 
--- Unlock the applet (allow dragging)
+-- Unlock the applet (allow dragging and show resize handle)
 function Fireside.Applet:Unlock()
     if self.frame then
         self.frame:RegisterForDrag("LeftButton")
+    end
+    if self.resizeHandle then
+        self.resizeHandle:Show()
     end
 end
 
@@ -151,6 +218,47 @@ function Fireside.Applet:ResetPosition()
     self.frame:ClearAllPoints()
     self.frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     self:SavePosition()
+end
+
+-- Save current size to SavedVariables
+function Fireside.Applet:SaveSize()
+    if not self.frame then return end
+
+    if not FiresideDB.applets[self.name] then
+        FiresideDB.applets[self.name] = {}
+    end
+
+    FiresideDB.applets[self.name].size = {
+        width = self.width,
+        height = self.height
+    }
+end
+
+-- Load size from SavedVariables
+function Fireside.Applet:LoadSize()
+    if not self.frame then return end
+
+    local saved = FiresideDB.applets[self.name]
+    if saved and saved.size then
+        local width = saved.size.width
+        local height = saved.size.height
+
+        -- Clamp to min/max
+        if width < self.minWidth then width = self.minWidth end
+        if width > self.maxWidth then width = self.maxWidth end
+        if height < self.minHeight then height = self.minHeight end
+        if height > self.maxHeight then height = self.maxHeight end
+
+        self.frame:SetWidth(width)
+        self.frame:SetHeight(height)
+        self.width = width
+        self.height = height
+    end
+end
+
+-- Override this in child classes to handle resize events
+function Fireside.Applet:OnResize(width, height)
+    -- Child classes can override this to reposition UI elements
 end
 
 -- Register an event
