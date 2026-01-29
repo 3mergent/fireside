@@ -30,6 +30,9 @@ local function OnEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ar
         if Fireside.Dashboard and Fireside.Dashboard.Initialize then
             Fireside.Dashboard:Initialize()
         end
+        if Fireside.MinimapIcon and Fireside.MinimapIcon.Initialize then
+            Fireside.MinimapIcon:Initialize()
+        end
     end
 end
 

@@ -10,3 +10,4 @@ Core\Dashboard.lua
 Core\Init.lua
 Applets\XPTracker.lua
 Settings.lua
+MinimapIcon.lua
