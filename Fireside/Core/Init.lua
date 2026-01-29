@@ -30,8 +30,15 @@ eventFrame:SetScript("OnEvent", function()
     if event == "ADDON_LOADED" and arg1 == "Fireside" then
         InitializeSavedVariables()
         DEFAULT_CHAT_FRAME:AddMessage("Fireside loaded. Type /fireside help for commands.", 0, 1, 0)
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard exists: " .. tostring(Fireside.Dashboard ~= nil), 1, 1, 0)
     elseif event == "PLAYER_LOGIN" then
-        Fireside.Dashboard:Initialize()
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: PLAYER_LOGIN fired, initializing Dashboard...", 1, 1, 0)
+        if Fireside.Dashboard and Fireside.Dashboard.Initialize then
+            Fireside.Dashboard:Initialize()
+            DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard initialized", 1, 1, 0)
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard.Initialize not found!", 1, 0, 0)
+        end
     end
 end)
 

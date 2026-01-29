@@ -18,10 +18,16 @@ end
 
 -- Initialize the applet frame
 function Fireside.Applet:Initialize()
-    if self.initialized then return end
+    if self.initialized then
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: " .. self.name .. " already initialized", 1, 0.5, 0)
+        return
+    end
+
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Creating frame for " .. self.name, 1, 1, 0)
 
     -- Create main frame
     self.frame = CreateFrame("Frame", "Fireside" .. self.name .. "Frame", UIParent)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame created: " .. tostring(self.frame ~= nil), 1, 1, 0)
     self.frame:SetWidth(self.width)
     self.frame:SetHeight(self.height)
     self.frame:SetFrameStrata("MEDIUM")

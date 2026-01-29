@@ -10,31 +10,47 @@ Fireside.Dashboard = {
 -- Register an applet with the dashboard
 function Fireside.Dashboard:RegisterApplet(applet)
     if not applet or not applet.name then
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Failed to register applet - invalid applet", 1, 0, 0)
         return false
     end
 
     self.applets[applet.name] = applet
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Registered applet: " .. applet.name, 1, 1, 0)
     return true
 end
 
 -- Initialize all registered applets
 function Fireside.Dashboard:Initialize()
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard:Initialize() called", 1, 1, 0)
+
     -- Load global lock state
     if FiresideDB.locked ~= nil then
         self.locked = FiresideDB.locked
     end
 
+    -- Count applets
+    local count = 0
+    for name, applet in pairs(self.applets) do
+        count = count + 1
+    end
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Found " .. count .. " registered applets", 1, 1, 0)
+
     -- Initialize enabled applets
     for name, applet in pairs(self.applets) do
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Processing applet: " .. name, 1, 1, 0)
         if applet:IsEnabled() then
+            DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Initializing " .. name .. "...", 1, 1, 0)
             applet:Initialize()
             applet:Show()
+            DEFAULT_CHAT_FRAME:AddMessage("DEBUG: " .. name .. " initialized and shown", 0, 1, 0)
 
             if self.locked then
                 applet:Lock()
             else
                 applet:Unlock()
             end
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("DEBUG: " .. name .. " is disabled", 1, 0.5, 0)
         end
     end
 end
