@@ -13,6 +13,7 @@ local titleText
 local currentXPText
 local currentXPLabel
 local currentXPCard
+local currentXPCardBorders  -- Table to store border textures
 local currentXPCardCelebrationBg
 local xpBarBg
 local xpBarRested
@@ -39,7 +40,7 @@ local levelUpTime = 0  -- Timestamp of last level up (whole seconds)
 local levelUpTimeHiRes = 0  -- High-resolution timestamp for smooth fade animation
 local levelUpDuration = 300  -- 5 minutes in seconds
 local levelUpTestMode = false  -- Test mode flag
-local levelUpTestDuration = 30  -- 30 seconds for test mode
+local levelUpTestDuration = 60  -- 1 minute for test mode
 
 -- Initialize UI
 function XPTracker:OnInitialize()
@@ -113,7 +114,35 @@ function XPTracker:OnInitialize()
     end
 
     -- Create bordered cards for each stat section
-    currentXPCard = CreateBorderedCard(self.frame)
+    -- CurrentXPCard created manually to allow border color changes during celebration
+    currentXPCard = CreateFrame("Frame", nil, self.frame)
+    currentXPCard:SetFrameLevel(self.frame:GetFrameLevel() + 2)
+
+    currentXPCardBorders = {}
+    currentXPCardBorders.top = currentXPCard:CreateTexture(nil, "OVERLAY")
+    currentXPCardBorders.top:SetHeight(1)
+    currentXPCardBorders.top:SetColorTexture(0.2, 0.2, 0.2, 1)
+    currentXPCardBorders.top:SetPoint("TOPLEFT", currentXPCard, "TOPLEFT")
+    currentXPCardBorders.top:SetPoint("TOPRIGHT", currentXPCard, "TOPRIGHT")
+
+    currentXPCardBorders.bottom = currentXPCard:CreateTexture(nil, "OVERLAY")
+    currentXPCardBorders.bottom:SetHeight(1)
+    currentXPCardBorders.bottom:SetColorTexture(0.2, 0.2, 0.2, 1)
+    currentXPCardBorders.bottom:SetPoint("BOTTOMLEFT", currentXPCard, "BOTTOMLEFT")
+    currentXPCardBorders.bottom:SetPoint("BOTTOMRIGHT", currentXPCard, "BOTTOMRIGHT")
+
+    currentXPCardBorders.left = currentXPCard:CreateTexture(nil, "OVERLAY")
+    currentXPCardBorders.left:SetWidth(1)
+    currentXPCardBorders.left:SetColorTexture(0.2, 0.2, 0.2, 1)
+    currentXPCardBorders.left:SetPoint("TOPLEFT", currentXPCard, "TOPLEFT")
+    currentXPCardBorders.left:SetPoint("BOTTOMLEFT", currentXPCard, "BOTTOMLEFT")
+
+    currentXPCardBorders.right = currentXPCard:CreateTexture(nil, "OVERLAY")
+    currentXPCardBorders.right:SetWidth(1)
+    currentXPCardBorders.right:SetColorTexture(0.2, 0.2, 0.2, 1)
+    currentXPCardBorders.right:SetPoint("TOPRIGHT", currentXPCard, "TOPRIGHT")
+    currentXPCardBorders.right:SetPoint("BOTTOMRIGHT", currentXPCard, "BOTTOMRIGHT")
+
     xpPerHourCard = CreateBorderedCard(self.frame)
     killsCard = CreateBorderedCard(self.frame)
     nextLevelCard = CreateBorderedCard(self.frame)
@@ -372,12 +401,22 @@ function XPTracker:UpdateCurrentXP()
         currentXPText:SetTextColor(0, 1, 0, 1)  -- Green
         currentXPLabel:SetText("LEVELED UP!")
         currentXPLabel:SetTextColor(0, 1, 0, 1)  -- Green
+
+        -- Change card borders to green
+        for _, border in pairs(currentXPCardBorders) do
+            border:SetColorTexture(0, 1, 0, 1)
+        end
     else
         -- Normal mode
         currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
         currentXPLabel:SetText("CURRENT XP")
         currentXPLabel:SetTextColor(1, 1, 1, 1)  -- White
         currentXPCardCelebrationBg:Hide()  -- Hide green background
+
+        -- Revert card borders to gray
+        for _, border in pairs(currentXPCardBorders) do
+            border:SetColorTexture(0.2, 0.2, 0.2, 1)
+        end
 
         -- Clear timer when celebration expires (both test and real)
         if levelUpTime > 0 then
@@ -539,13 +578,13 @@ function XPTracker:OnLevelUp()
     self:SaveSessionData()
 end
 
--- Test level up (for testing, expires after 30 seconds)
+-- Test level up (for testing, expires after 1 minute)
 function XPTracker:TestLevelUp()
     levelUpTime = time()
     levelUpTimeHiRes = GetTime()  -- High-resolution timestamp for smooth fade
     levelUpTestMode = true
     self:UpdateCurrentXP()
-    DEFAULT_CHAT_FRAME:AddMessage("Fireside: Test level-up activated (30 seconds)", 0, 1, 0)
+    DEFAULT_CHAT_FRAME:AddMessage("Fireside: Test level-up activated (1 minute)", 0, 1, 0)
 end
 
 -- Save session data to SavedVariables
