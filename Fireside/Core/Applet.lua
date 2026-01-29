@@ -80,6 +80,43 @@ function Fireside.Applet:Initialize()
         if button == "LeftButton" and not applet:IsLocked() then
             applet.frame:StartSizing("BOTTOMRIGHT")
             applet.isResizing = true
+
+            -- Start OnUpdate loop to enforce constraints while dragging
+            applet.frame:SetScript("OnUpdate", function(self, elapsed)
+                if applet.isResizing then
+                    local width = applet.frame:GetWidth()
+                    local height = applet.frame:GetHeight()
+                    local clamped = false
+
+                    -- Clamp width
+                    if width < applet.minWidth then
+                        width = applet.minWidth
+                        clamped = true
+                    elseif width > applet.maxWidth then
+                        width = applet.maxWidth
+                        clamped = true
+                    end
+
+                    -- Clamp height
+                    if height < applet.minHeight then
+                        height = applet.minHeight
+                        clamped = true
+                    elseif height > applet.maxHeight then
+                        height = applet.maxHeight
+                        clamped = true
+                    end
+
+                    -- Apply clamped size if needed
+                    if clamped then
+                        applet.frame:SetWidth(width)
+                        applet.frame:SetHeight(height)
+                    end
+
+                    -- Update stored dimensions
+                    applet.width = width
+                    applet.height = height
+                end
+            end)
         end
     end)
 
@@ -88,22 +125,12 @@ function Fireside.Applet:Initialize()
             applet.frame:StopMovingOrSizing()
             applet.isResizing = false
 
-            -- Clamp size to min/max
-            local width = applet.frame:GetWidth()
-            local height = applet.frame:GetHeight()
+            -- Stop the OnUpdate loop
+            applet.frame:SetScript("OnUpdate", nil)
 
-            if width < applet.minWidth then width = applet.minWidth end
-            if width > applet.maxWidth then width = applet.maxWidth end
-            if height < applet.minHeight then height = applet.minHeight end
-            if height > applet.maxHeight then height = applet.maxHeight end
-
-            applet.frame:SetWidth(width)
-            applet.frame:SetHeight(height)
-            applet.width = width
-            applet.height = height
-
+            -- Save final size
             applet:SaveSize()
-            applet:OnResize(width, height)
+            applet:OnResize(applet.width, applet.height)
         end
     end)
 
