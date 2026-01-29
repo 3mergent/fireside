@@ -16,6 +16,7 @@ local currentXPCard
 local currentXPCardBorders  -- Table to store border textures
 local currentXPCardCelebrationBg
 local xpBarBg
+local xpBarBgBorders  -- Table to store XP bar border textures
 local xpBarRested
 local xpBarFg
 local xpPerHourCard
@@ -159,6 +160,24 @@ function XPTracker:OnInitialize()
     xpBarBg:SetColorTexture(0.05, 0.05, 0.3, 1.0)  -- Darker blue
     xpBarBg:SetHeight(10)
 
+    -- Create XP bar borders (light blue, matching rested XP color)
+    xpBarBgBorders = {}
+    xpBarBgBorders.top = currentXPCard:CreateTexture(nil, "BORDER")
+    xpBarBgBorders.top:SetHeight(1)
+    xpBarBgBorders.top:SetColorTexture(0.3, 0.5, 0.9, 1.0)  -- Light blue
+
+    xpBarBgBorders.bottom = currentXPCard:CreateTexture(nil, "BORDER")
+    xpBarBgBorders.bottom:SetHeight(1)
+    xpBarBgBorders.bottom:SetColorTexture(0.3, 0.5, 0.9, 1.0)  -- Light blue
+
+    xpBarBgBorders.left = currentXPCard:CreateTexture(nil, "BORDER")
+    xpBarBgBorders.left:SetWidth(1)
+    xpBarBgBorders.left:SetColorTexture(0.3, 0.5, 0.9, 1.0)  -- Light blue
+
+    xpBarBgBorders.right = currentXPCard:CreateTexture(nil, "BORDER")
+    xpBarBgBorders.right:SetWidth(1)
+    xpBarBgBorders.right:SetColorTexture(0.3, 0.5, 0.9, 1.0)  -- Light blue
+
     -- Create rested XP bar (middle layer - light blue at 25% opacity, rested XP percentage)
     xpBarRested = currentXPCard:CreateTexture(nil, "ARTWORK")
     xpBarRested:SetColorTexture(0.3, 0.5, 0.9, 0.25)  -- Light blue, 25% opacity
@@ -293,6 +312,23 @@ function XPTracker:UpdateLayout()
     xpBarBg:ClearAllPoints()
     xpBarBg:SetPoint("BOTTOMLEFT", currentXPCard, "BOTTOMLEFT", cardPadding, cardPadding)
     xpBarBg:SetPoint("BOTTOMRIGHT", currentXPCard, "BOTTOMRIGHT", -cardPadding, cardPadding)
+
+    -- Position XP bar borders around background bar
+    xpBarBgBorders.top:ClearAllPoints()
+    xpBarBgBorders.top:SetPoint("BOTTOMLEFT", xpBarBg, "TOPLEFT", 0, 0)
+    xpBarBgBorders.top:SetPoint("BOTTOMRIGHT", xpBarBg, "TOPRIGHT", 0, 0)
+
+    xpBarBgBorders.bottom:ClearAllPoints()
+    xpBarBgBorders.bottom:SetPoint("TOPLEFT", xpBarBg, "BOTTOMLEFT", 0, 0)
+    xpBarBgBorders.bottom:SetPoint("TOPRIGHT", xpBarBg, "BOTTOMRIGHT", 0, 0)
+
+    xpBarBgBorders.left:ClearAllPoints()
+    xpBarBgBorders.left:SetPoint("TOPRIGHT", xpBarBg, "TOPLEFT", 0, 0)
+    xpBarBgBorders.left:SetPoint("BOTTOMRIGHT", xpBarBg, "BOTTOMLEFT", 0, 0)
+
+    xpBarBgBorders.right:ClearAllPoints()
+    xpBarBgBorders.right:SetPoint("TOPLEFT", xpBarBg, "TOPRIGHT", 0, 0)
+    xpBarBgBorders.right:SetPoint("BOTTOMLEFT", xpBarBg, "BOTTOMRIGHT", 0, 0)
 
     xpBarRested:ClearAllPoints()
     xpBarRested:SetPoint("BOTTOMLEFT", currentXPCard, "BOTTOMLEFT", cardPadding, cardPadding)
