@@ -8,6 +8,7 @@ Fireside = Fireside or {}
 local XPTracker = Fireside.Applet:New("XPTracker", 168, 256, 150, 240, 256, 384)
 
 -- UI Elements
+local logoTexture
 local titleText
 local currentXPText
 local currentXPLabel
@@ -40,10 +41,18 @@ function XPTracker:OnInitialize()
         lastKillXP = saved.sessionData.lastKillXP or 0
     end
 
-    -- Title: Fireside heading (reduced by 20%: 14pt → 11pt)
-    titleText = self:CreateFontString(nil, "OVERLAY", 11, "CENTER", "TOP")
-    titleText:SetPoint("TOP", self.frame, "TOP", 0, -8)
-    titleText:SetText("Fireside")
+    -- Logo on the left (15% of frame width, ~25px)
+    local logoSize = math.floor(self.width * 0.15)
+    logoTexture = self.frame:CreateTexture(nil, "ARTWORK")
+    logoTexture:SetTexture("Interface\\AddOns\\Fireside\\Images\\fireside-logo.png")
+    logoTexture:SetWidth(logoSize)
+    logoTexture:SetHeight(logoSize)
+    logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 5, -5)
+
+    -- Title: Fireside XP Tracker heading (right side, reduced by 20%: 14pt → 11pt)
+    titleText = self:CreateFontString(nil, "OVERLAY", 11, "RIGHT", "TOP")
+    titleText:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -5, -8)
+    titleText:SetText("Fireside XP Tracker")
     titleText:SetTextColor(1, 0.82, 0, 1)
 
     -- Current XP Section (centered, large)
@@ -175,6 +184,13 @@ function XPTracker:UpdateLayout()
     local height = self.height
     local padding = 5  -- Uniform 5px spacing everywhere
     local cardPadding = 5
+
+    -- Update logo size (15% of frame width)
+    local logoSize = math.floor(width * 0.15)
+    if logoTexture then
+        logoTexture:SetWidth(logoSize)
+        logoTexture:SetHeight(logoSize)
+    end
 
     -- Calculate responsive positions
     local titleAreaHeight = 30
