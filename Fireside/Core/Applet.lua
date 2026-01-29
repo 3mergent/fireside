@@ -39,12 +39,32 @@ function Fireside.Applet:Initialize()
     -- Create background texture (SetBackdrop doesn't work in TBC Anniversary)
     local bg = self.frame:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints(self.frame)
-    bg:SetColorTexture(0, 0, 0, 0.5)  -- Black with 50% opacity (more transparent)
+    bg:SetColorTexture(0, 0, 0, 0.8)  -- Black with 80% opacity
 
-    -- Create border texture
-    local border = self.frame:CreateTexture(nil, "BORDER")
-    border:SetAllPoints(self.frame)
-    border:SetColorTexture(0, 0, 0, 1.0)  -- Black border, fully opaque
+    -- Create 1px border edges (#ff4000 orange)
+    local borderTop = self.frame:CreateTexture(nil, "BORDER")
+    borderTop:SetHeight(1)
+    borderTop:SetColorTexture(1.0, 0.251, 0.0, 1.0)
+    borderTop:SetPoint("TOPLEFT", self.frame, "TOPLEFT")
+    borderTop:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT")
+
+    local borderBottom = self.frame:CreateTexture(nil, "BORDER")
+    borderBottom:SetHeight(1)
+    borderBottom:SetColorTexture(1.0, 0.251, 0.0, 1.0)
+    borderBottom:SetPoint("BOTTOMLEFT", self.frame, "BOTTOMLEFT")
+    borderBottom:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT")
+
+    local borderLeft = self.frame:CreateTexture(nil, "BORDER")
+    borderLeft:SetWidth(1)
+    borderLeft:SetColorTexture(1.0, 0.251, 0.0, 1.0)
+    borderLeft:SetPoint("TOPLEFT", self.frame, "TOPLEFT")
+    borderLeft:SetPoint("BOTTOMLEFT", self.frame, "BOTTOMLEFT")
+
+    local borderRight = self.frame:CreateTexture(nil, "BORDER")
+    borderRight:SetWidth(1)
+    borderRight:SetColorTexture(1.0, 0.251, 0.0, 1.0)
+    borderRight:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT")
+    borderRight:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT")
 
     DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Creating resize handle...", 1, 1, 0)
     -- Create resize handle in bottom right corner
