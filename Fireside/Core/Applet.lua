@@ -19,41 +19,29 @@ end
 -- Initialize the applet frame
 function Fireside.Applet:Initialize()
     if self.initialized then
-        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: " .. self.name .. " already initialized", 1, 0.5, 0)
         return
     end
 
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Creating frame for " .. self.name, 1, 1, 0)
-
     -- Create main frame
     self.frame = CreateFrame("Frame", "Fireside" .. self.name .. "Frame", UIParent)
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame created: " .. tostring(self.frame ~= nil), 1, 1, 0)
-
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Setting frame properties...", 1, 1, 0)
     self.frame:SetWidth(self.width)
     self.frame:SetHeight(self.height)
     self.frame:SetFrameStrata("MEDIUM")
     self.frame:SetMovable(true)
     self.frame:EnableMouse(true)
     self.frame:RegisterForDrag("LeftButton")
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame properties set", 1, 1, 0)
 
     -- Create background texture (SetBackdrop doesn't work in TBC Anniversary)
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Creating background texture...", 1, 1, 0)
     local bg = self.frame:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints(self.frame)
     bg:SetColorTexture(0, 0, 0, 0.8)  -- Black with 80% opacity
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Background texture created", 1, 1, 0)
 
     -- Create border texture
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Creating border texture...", 1, 1, 0)
     local border = self.frame:CreateTexture(nil, "BORDER")
     border:SetAllPoints(self.frame)
     border:SetColorTexture(0, 0, 0, 1.0)  -- Black border, fully opaque
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Border texture created", 1, 1, 0)
 
     -- Dragging functionality
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Setting up drag handlers...", 1, 1, 0)
     local applet = self  -- Capture self for closures
 
     self.frame:SetScript("OnDragStart", function()
@@ -66,17 +54,12 @@ function Fireside.Applet:Initialize()
         this:StopMovingOrSizing()
         applet:SavePosition()
     end)
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Drag handlers set", 1, 1, 0)
 
     -- Load saved position or center on screen
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Loading position...", 1, 1, 0)
     self:LoadPosition()
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Position loaded", 1, 1, 0)
 
     self.initialized = true
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Calling OnInitialize...", 1, 1, 0)
     self:OnInitialize()
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Applet initialization complete!", 0, 1, 0)
 end
 
 -- Override this in child classes for custom initialization

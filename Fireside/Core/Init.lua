@@ -23,21 +23,12 @@ end
 
 -- Event handler function - first param is frame, second is event name
 local function OnEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: OnEvent called!", 1, 1, 1)
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: event=" .. tostring(event) .. ", arg1=" .. tostring(arg1), 1, 0.5, 1)
-
     if event == "ADDON_LOADED" and arg1 == "Fireside" then
-        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: ADDON_LOADED for Fireside detected!", 0, 1, 1)
         InitializeSavedVariables()
         DEFAULT_CHAT_FRAME:AddMessage("Fireside loaded. Type /fireside help for commands.", 0, 1, 0)
-        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard exists: " .. tostring(Fireside.Dashboard ~= nil), 1, 1, 0)
     elseif event == "PLAYER_LOGIN" then
-        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: PLAYER_LOGIN fired, initializing Dashboard...", 1, 1, 0)
         if Fireside.Dashboard and Fireside.Dashboard.Initialize then
             Fireside.Dashboard:Initialize()
-            DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard initialized", 1, 1, 0)
-        else
-            DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard.Initialize not found!", 1, 0, 0)
         end
     end
 end
