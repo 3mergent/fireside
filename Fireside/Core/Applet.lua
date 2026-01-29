@@ -47,6 +47,12 @@ function Fireside.Applet:Initialize()
     self.frame:SetBackdropColor(0, 0, 0, 0.8)
     self.frame:SetBackdropBorderColor(0, 0, 0, 1.0)
 
+    -- Add a bright test texture to make the frame visible
+    local testTexture = self.frame:CreateTexture(nil, "BACKGROUND")
+    testTexture:SetAllPoints(self.frame)
+    testTexture:SetColorTexture(1, 0, 0, 0.5)  -- Bright red, semi-transparent
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Added red test texture to frame", 1, 1, 0)
+
     -- Dragging functionality
     local applet = self  -- Capture self for closures
 

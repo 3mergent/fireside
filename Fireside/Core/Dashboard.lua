@@ -42,7 +42,19 @@ function Fireside.Dashboard:Initialize()
             DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Initializing " .. name .. "...", 1, 1, 0)
             applet:Initialize()
             applet:Show()
-            DEFAULT_CHAT_FRAME:AddMessage("DEBUG: " .. name .. " initialized and shown", 0, 1, 0)
+
+            -- Debug frame state
+            if applet.frame then
+                DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame exists: " .. tostring(applet.frame:GetName()), 0, 1, 0)
+                DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame IsShown: " .. tostring(applet.frame:IsShown()), 0, 1, 0)
+                DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame size: " .. applet.frame:GetWidth() .. "x" .. applet.frame:GetHeight(), 0, 1, 0)
+                local point, relativeTo, relativePoint, x, y = applet.frame:GetPoint()
+                DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame position: " .. tostring(point) .. " " .. tostring(x) .. "," .. tostring(y), 0, 1, 0)
+                DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame strata: " .. tostring(applet.frame:GetFrameStrata()), 0, 1, 0)
+                DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame alpha: " .. tostring(applet.frame:GetAlpha()), 0, 1, 0)
+            else
+                DEFAULT_CHAT_FRAME:AddMessage("DEBUG: ERROR - applet.frame is nil!", 1, 0, 0)
+            end
 
             if self.locked then
                 applet:Lock()
