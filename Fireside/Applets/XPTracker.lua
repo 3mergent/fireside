@@ -191,7 +191,7 @@ function XPTracker:UpdateLayout()
     -- Calculate stat card dimensions (2x2 grid)
     local statCardWidth = (width - (padding * 3)) / 2
     local statCardHeight = (remainingHeight - cardPadding) / 2
-    local statCardsStartY = titleAreaHeight + currentXPHeight + 5
+    local statCardsStartY = titleAreaHeight + currentXPHeight + 25  -- Moved down 20px to account for taller Current XP card
 
     -- XP/HR card (top left)
     xpPerHourCard:ClearAllPoints()
