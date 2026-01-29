@@ -13,6 +13,7 @@ local titleText
 local currentXPText
 local currentXPLabel
 local currentXPCard
+local currentXPCardCelebrationBg
 local xpBarBg
 local xpBarRested
 local xpBarFg
@@ -116,6 +117,12 @@ function XPTracker:OnInitialize()
     killsCard = CreateBorderedCard(self.frame)
     nextLevelCard = CreateBorderedCard(self.frame)
     timeCard = CreateBorderedCard(self.frame)
+
+    -- Create celebration background (green, 25% opacity, hidden by default)
+    currentXPCardCelebrationBg = currentXPCard:CreateTexture(nil, "BACKGROUND")
+    currentXPCardCelebrationBg:SetAllPoints(currentXPCard)
+    currentXPCardCelebrationBg:SetColorTexture(0, 1, 0, 0.25)  -- Green, 25% opacity
+    currentXPCardCelebrationBg:Hide()
 
     -- Create XP bar (background - darker blue, static)
     xpBarBg = currentXPCard:CreateTexture(nil, "BORDER")
@@ -347,16 +354,20 @@ function XPTracker:UpdateCurrentXP()
         currentXPText:SetTextColor(0, 1, 0, 1)  -- Green
         currentXPLabel:SetText("LEVELED UP!")
         currentXPLabel:SetTextColor(0, 1, 0, 1)  -- Green
+        currentXPCardCelebrationBg:Show()  -- Show green background
     else
         -- Normal mode
         currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
         currentXPLabel:SetText("CURRENT XP")
         currentXPLabel:SetTextColor(1, 1, 1, 1)  -- White
+        currentXPCardCelebrationBg:Hide()  -- Hide green background
 
-        -- Clear test mode and timer when expires
-        if levelUpTestMode then
-            levelUpTestMode = false
+        -- Clear timer when celebration expires (both test and real)
+        if levelUpTime > 0 then
             levelUpTime = 0
+            if levelUpTestMode then
+                levelUpTestMode = false
+            end
         end
     end
 
