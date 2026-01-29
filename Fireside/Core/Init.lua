@@ -21,9 +21,9 @@ local function InitializeSavedVariables()
     end
 end
 
--- Event handler function - receives event info as parameters
-local function OnEvent(event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: OnEvent called with params!", 1, 1, 1)
+-- Event handler function - first param is frame, second is event name
+local function OnEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: OnEvent called!", 1, 1, 1)
     DEFAULT_CHAT_FRAME:AddMessage("DEBUG: event=" .. tostring(event) .. ", arg1=" .. tostring(arg1), 1, 0.5, 1)
 
     if event == "ADDON_LOADED" and arg1 == "Fireside" then
