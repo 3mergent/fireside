@@ -36,6 +36,8 @@ local maxSamples = 60
 local updateInterval = 1.0
 local levelUpTime = 0  -- Timestamp of last level up
 local levelUpDuration = 300  -- 5 minutes in seconds
+local levelUpTestMode = false  -- Test mode flag
+local levelUpTestDuration = 30  -- 30 seconds for test mode
 
 -- Initialize UI
 function XPTracker:OnInitialize()
@@ -335,9 +337,10 @@ function XPTracker:UpdateCurrentXP()
 
     currentXPText:SetText(string.format("%.1f%%", percentage))
 
-    -- Check if we recently leveled up (within 5 minutes)
+    -- Check if we recently leveled up (use test duration if in test mode)
     local timeSinceLevelUp = time() - levelUpTime
-    local isRecentLevelUp = levelUpTime > 0 and timeSinceLevelUp < levelUpDuration
+    local duration = levelUpTestMode and levelUpTestDuration or levelUpDuration
+    local isRecentLevelUp = levelUpTime > 0 and timeSinceLevelUp < duration
 
     if isRecentLevelUp then
         -- Level up celebration mode
@@ -349,6 +352,11 @@ function XPTracker:UpdateCurrentXP()
         currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
         currentXPLabel:SetText("CURRENT XP")
         currentXPLabel:SetTextColor(1, 1, 1, 1)  -- White
+
+        -- Clear test mode when timer expires
+        if levelUpTestMode then
+            levelUpTestMode = false
+        end
     end
 
     -- Update XP bar widths
@@ -499,6 +507,14 @@ function XPTracker:OnLevelUp()
     self:UpdateKillsToLevel()
     self:UpdateTimeToLevel()
     self:SaveSessionData()
+end
+
+-- Test level up (for testing, expires after 30 seconds)
+function XPTracker:TestLevelUp()
+    levelUpTime = time()
+    levelUpTestMode = true
+    self:UpdateCurrentXP()
+    DEFAULT_CHAT_FRAME:AddMessage("Fireside: Test level-up activated (30 seconds)", 0, 1, 0)
 end
 
 -- Save session data to SavedVariables

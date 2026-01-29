@@ -119,6 +119,14 @@ local function SlashCommandHandler(msg)
         DEFAULT_CHAT_FRAME:AddMessage("Manually triggering Dashboard:Initialize()...", 1, 1, 0)
         Fireside.Dashboard:Initialize()
 
+    elseif command == "test" then
+        local xpTracker = Fireside.Dashboard:GetApplet("XPTracker")
+        if xpTracker and xpTracker.TestLevelUp then
+            xpTracker:TestLevelUp()
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("Fireside: XP Tracker not available.", 1, 0, 0)
+        end
+
     else
         DEFAULT_CHAT_FRAME:AddMessage("Fireside: Unknown command. Type /fireside help for commands.", 1, 0, 0)
     end
