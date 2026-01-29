@@ -21,12 +21,9 @@ local function InitializeSavedVariables()
     end
 end
 
--- Event handler frame
-local eventFrame = CreateFrame("Frame")
-eventFrame:RegisterEvent("ADDON_LOADED")
-eventFrame:RegisterEvent("PLAYER_LOGIN")
-
-eventFrame:SetScript("OnEvent", function()
+-- Event handler function
+local function OnEvent()
+    -- In TBC, event and arg1 are global variables set by the event system
     DEFAULT_CHAT_FRAME:AddMessage("DEBUG: OnEvent fired! event=" .. tostring(event) .. ", arg1=" .. tostring(arg1), 1, 0.5, 1)
 
     if event == "ADDON_LOADED" and arg1 == "Fireside" then
@@ -43,7 +40,13 @@ eventFrame:SetScript("OnEvent", function()
             DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard.Initialize not found!", 1, 0, 0)
         end
     end
-end)
+end
+
+-- Event handler frame
+local eventFrame = CreateFrame("Frame")
+eventFrame:RegisterEvent("ADDON_LOADED")
+eventFrame:RegisterEvent("PLAYER_LOGIN")
+eventFrame:SetScript("OnEvent", OnEvent)
 
 -- Slash command handler
 local function SlashCommandHandler(msg)

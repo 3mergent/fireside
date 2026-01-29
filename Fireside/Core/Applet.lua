@@ -48,15 +48,17 @@ function Fireside.Applet:Initialize()
     self.frame:SetBackdropBorderColor(0, 0, 0, 1.0)
 
     -- Dragging functionality
+    local applet = self  -- Capture self for closures
+
     self.frame:SetScript("OnDragStart", function()
-        if not self:IsLocked() then
+        if not applet:IsLocked() then
             this:StartMoving()
         end
     end)
 
     self.frame:SetScript("OnDragStop", function()
         this:StopMovingOrSizing()
-        self:SavePosition()
+        applet:SavePosition()
     end)
 
     -- Load saved position or center on screen

@@ -84,7 +84,8 @@ function XPTracker:OnInitialize()
     self.frame:RegisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
     self.frame:RegisterEvent("PLAYER_LEVEL_UP")
 
-    self.frame:SetScript("OnEvent", function()
+    -- Event handler must be a named function to access global event/arg1
+    local function OnEvent()
         if event == "PLAYER_XP_UPDATE" then
             XPTracker:UpdateCurrentXP()
             XPTracker:UpdateKillsToLevel()
@@ -94,11 +95,12 @@ function XPTracker:OnInitialize()
         elseif event == "PLAYER_LEVEL_UP" then
             XPTracker:OnLevelUp()
         end
-    end)
+    end
+    self.frame:SetScript("OnEvent", OnEvent)
 
     -- Set up OnUpdate for XP/hr tracking
     local timeSinceLastUpdate = 0
-    self.frame:SetScript("OnUpdate", function()
+    local function OnUpdate()
         timeSinceLastUpdate = timeSinceLastUpdate + arg1
         if timeSinceLastUpdate >= updateInterval then
             XPTracker:RecordXPSample()
@@ -106,7 +108,8 @@ function XPTracker:OnInitialize()
             XPTracker:UpdateTimeToLevel()
             timeSinceLastUpdate = 0
         end
-    end)
+    end
+    self.frame:SetScript("OnUpdate", OnUpdate)
 
     -- Initial update
     self:UpdateCurrentXP()
