@@ -38,27 +38,19 @@ function Fireside.Applet:Initialize()
     self.frame:RegisterForDrag("LeftButton")
     DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame properties set", 1, 1, 0)
 
-    -- Set up backdrop (background and border)
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Setting backdrop...", 1, 1, 0)
-    self.frame:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true,
-        tileSize = 32,
-        edgeSize = 16,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 }
-    })
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Backdrop set, setting colors...", 1, 1, 0)
-    self.frame:SetBackdropColor(0, 0, 0, 0.8)
-    self.frame:SetBackdropBorderColor(0, 0, 0, 1.0)
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Backdrop colors set", 1, 1, 0)
+    -- Create background texture (SetBackdrop doesn't work in TBC Anniversary)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Creating background texture...", 1, 1, 0)
+    local bg = self.frame:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints(self.frame)
+    bg:SetColorTexture(0, 0, 0, 0.8)  -- Black with 80% opacity
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Background texture created", 1, 1, 0)
 
-    -- Add a bright test texture to make the frame visible
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Creating test texture...", 1, 1, 0)
-    local testTexture = self.frame:CreateTexture(nil, "BACKGROUND")
-    testTexture:SetAllPoints(self.frame)
-    testTexture:SetColorTexture(1, 0, 0, 0.5)  -- Bright red, semi-transparent
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Added red test texture to frame", 1, 1, 0)
+    -- Create border texture
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Creating border texture...", 1, 1, 0)
+    local border = self.frame:CreateTexture(nil, "BORDER")
+    border:SetAllPoints(self.frame)
+    border:SetColorTexture(0, 0, 0, 1.0)  -- Black border, fully opaque
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Border texture created", 1, 1, 0)
 
     -- Dragging functionality
     DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Setting up drag handlers...", 1, 1, 0)
