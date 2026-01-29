@@ -56,29 +56,71 @@ function XPTracker:OnInitialize()
     -- Create column container frames with borders
     -- Left column (XP/HR and NEXT)
     leftColumnFrame = CreateFrame("Frame", nil, self.frame)
-    leftColumnFrame:SetFrameLevel(self.frame:GetFrameLevel() + 1)
+    leftColumnFrame:SetFrameLevel(self.frame:GetFrameLevel())
 
-    local leftBorder = leftColumnFrame:CreateTexture(nil, "BACKGROUND")
-    leftBorder:SetAllPoints(leftColumnFrame)
-    leftBorder:SetColorTexture(0.3, 0.3, 0.3, 1)  -- Dark gray border
+    -- Create 4 thin border textures (top, bottom, left, right) instead of filling
+    local leftBorderTop = leftColumnFrame:CreateTexture(nil, "BACKGROUND")
+    leftBorderTop:SetHeight(1)
+    leftBorderTop:SetColorTexture(0.3, 0.3, 0.3, 1)
 
-    local leftBg = leftColumnFrame:CreateTexture(nil, "BORDER")
-    leftBg:SetPoint("TOPLEFT", leftColumnFrame, "TOPLEFT", 1, -1)
-    leftBg:SetPoint("BOTTOMRIGHT", leftColumnFrame, "BOTTOMRIGHT", -1, 1)
-    leftBg:SetColorTexture(0, 0, 0, 0)  -- Transparent inside
+    local leftBorderBottom = leftColumnFrame:CreateTexture(nil, "BACKGROUND")
+    leftBorderBottom:SetHeight(1)
+    leftBorderBottom:SetColorTexture(0.3, 0.3, 0.3, 1)
+
+    local leftBorderLeft = leftColumnFrame:CreateTexture(nil, "BACKGROUND")
+    leftBorderLeft:SetWidth(1)
+    leftBorderLeft:SetColorTexture(0.3, 0.3, 0.3, 1)
+
+    local leftBorderRight = leftColumnFrame:CreateTexture(nil, "BACKGROUND")
+    leftBorderRight:SetWidth(1)
+    leftBorderRight:SetColorTexture(0.3, 0.3, 0.3, 1)
+
+    -- Position borders
+    leftBorderTop:SetPoint("TOPLEFT", leftColumnFrame, "TOPLEFT")
+    leftBorderTop:SetPoint("TOPRIGHT", leftColumnFrame, "TOPRIGHT")
+
+    leftBorderBottom:SetPoint("BOTTOMLEFT", leftColumnFrame, "BOTTOMLEFT")
+    leftBorderBottom:SetPoint("BOTTOMRIGHT", leftColumnFrame, "BOTTOMRIGHT")
+
+    leftBorderLeft:SetPoint("TOPLEFT", leftColumnFrame, "TOPLEFT")
+    leftBorderLeft:SetPoint("BOTTOMLEFT", leftColumnFrame, "BOTTOMLEFT")
+
+    leftBorderRight:SetPoint("TOPRIGHT", leftColumnFrame, "TOPRIGHT")
+    leftBorderRight:SetPoint("BOTTOMRIGHT", leftColumnFrame, "BOTTOMRIGHT")
 
     -- Right column (KILLS and TIME)
     rightColumnFrame = CreateFrame("Frame", nil, self.frame)
-    rightColumnFrame:SetFrameLevel(self.frame:GetFrameLevel() + 1)
+    rightColumnFrame:SetFrameLevel(self.frame:GetFrameLevel())
 
-    local rightBorder = rightColumnFrame:CreateTexture(nil, "BACKGROUND")
-    rightBorder:SetAllPoints(rightColumnFrame)
-    rightBorder:SetColorTexture(0.3, 0.3, 0.3, 1)  -- Dark gray border
+    -- Create 4 thin border textures
+    local rightBorderTop = rightColumnFrame:CreateTexture(nil, "BACKGROUND")
+    rightBorderTop:SetHeight(1)
+    rightBorderTop:SetColorTexture(0.3, 0.3, 0.3, 1)
 
-    local rightBg = rightColumnFrame:CreateTexture(nil, "BORDER")
-    rightBg:SetPoint("TOPLEFT", rightColumnFrame, "TOPLEFT", 1, -1)
-    rightBg:SetPoint("BOTTOMRIGHT", rightColumnFrame, "BOTTOMRIGHT", -1, 1)
-    rightBg:SetColorTexture(0, 0, 0, 0)  -- Transparent inside
+    local rightBorderBottom = rightColumnFrame:CreateTexture(nil, "BACKGROUND")
+    rightBorderBottom:SetHeight(1)
+    rightBorderBottom:SetColorTexture(0.3, 0.3, 0.3, 1)
+
+    local rightBorderLeft = rightColumnFrame:CreateTexture(nil, "BACKGROUND")
+    rightBorderLeft:SetWidth(1)
+    rightBorderLeft:SetColorTexture(0.3, 0.3, 0.3, 1)
+
+    local rightBorderRight = rightColumnFrame:CreateTexture(nil, "BACKGROUND")
+    rightBorderRight:SetWidth(1)
+    rightBorderRight:SetColorTexture(0.3, 0.3, 0.3, 1)
+
+    -- Position borders
+    rightBorderTop:SetPoint("TOPLEFT", rightColumnFrame, "TOPLEFT")
+    rightBorderTop:SetPoint("TOPRIGHT", rightColumnFrame, "TOPRIGHT")
+
+    rightBorderBottom:SetPoint("BOTTOMLEFT", rightColumnFrame, "BOTTOMLEFT")
+    rightBorderBottom:SetPoint("BOTTOMRIGHT", rightColumnFrame, "BOTTOMRIGHT")
+
+    rightBorderLeft:SetPoint("TOPLEFT", rightColumnFrame, "TOPLEFT")
+    rightBorderLeft:SetPoint("BOTTOMLEFT", rightColumnFrame, "BOTTOMLEFT")
+
+    rightBorderRight:SetPoint("TOPRIGHT", rightColumnFrame, "TOPRIGHT")
+    rightBorderRight:SetPoint("BOTTOMRIGHT", rightColumnFrame, "BOTTOMRIGHT")
 
     -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
     local statNumberSize = 36  -- 50% larger (was 24, now 36)
