@@ -14,6 +14,7 @@ local currentXPText
 local currentXPLabel
 local currentXPCard
 local xpBarBg
+local xpBarRested
 local xpBarFg
 local xpPerHourCard
 local killsCard
@@ -114,14 +115,19 @@ function XPTracker:OnInitialize()
     nextLevelCard = CreateBorderedCard(self.frame)
     timeCard = CreateBorderedCard(self.frame)
 
-    -- Create XP bar (background - dark blue, static)
+    -- Create XP bar (background - darker blue, static)
     xpBarBg = currentXPCard:CreateTexture(nil, "BORDER")
-    xpBarBg:SetColorTexture(0.1, 0.1, 0.5, 1.0)  -- Dark blue
+    xpBarBg:SetColorTexture(0.05, 0.05, 0.3, 1.0)  -- Darker blue
     xpBarBg:SetHeight(10)
 
-    -- Create XP bar (foreground - lighter blue, percentage-based width)
-    xpBarFg = currentXPCard:CreateTexture(nil, "ARTWORK")
-    xpBarFg:SetColorTexture(0.3, 0.5, 0.9, 1.0)  -- Light blue (almost primary)
+    -- Create rested XP bar (middle layer - light blue, rested XP percentage)
+    xpBarRested = currentXPCard:CreateTexture(nil, "ARTWORK")
+    xpBarRested:SetColorTexture(0.3, 0.5, 0.9, 1.0)  -- Light blue
+    xpBarRested:SetHeight(10)
+
+    -- Create current XP bar (foreground - orange, current XP percentage)
+    xpBarFg = currentXPCard:CreateTexture(nil, "OVERLAY")
+    xpBarFg:SetColorTexture(1.0, 0.251, 0.0, 1.0)  -- Orange (frame border color)
     xpBarFg:SetHeight(10)
 
     -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
@@ -231,6 +237,9 @@ function XPTracker:UpdateLayout()
     xpBarBg:SetPoint("BOTTOMLEFT", currentXPCard, "BOTTOMLEFT", cardPadding, cardPadding)
     xpBarBg:SetPoint("BOTTOMRIGHT", currentXPCard, "BOTTOMRIGHT", -cardPadding, cardPadding)
 
+    xpBarRested:ClearAllPoints()
+    xpBarRested:SetPoint("BOTTOMLEFT", currentXPCard, "BOTTOMLEFT", cardPadding, cardPadding)
+
     xpBarFg:ClearAllPoints()
     xpBarFg:SetPoint("BOTTOMLEFT", currentXPCard, "BOTTOMLEFT", cardPadding, cardPadding)
 
@@ -288,14 +297,23 @@ function XPTracker:UpdateLayout()
     timeToLevelText:ClearAllPoints()
     timeToLevelText:SetPoint("CENTER", timeCard, "CENTER", 0, 8)
 
-    -- Update XP bar width when frame is resized
+    -- Update XP bar widths when frame is resized
     local currentXP = UnitXP("player")
     local maxXP = UnitXPMax("player")
     if maxXP > 0 then
-        local percentage = (currentXP / maxXP) * 100
         local availableWidth = currentXPCard:GetWidth() - (cardPadding * 2)
-        local barWidth = availableWidth * (percentage / 100)
-        xpBarFg:SetWidth(barWidth)
+
+        -- Current XP bar
+        local percentage = (currentXP / maxXP) * 100
+        local currentBarWidth = availableWidth * (percentage / 100)
+        xpBarFg:SetWidth(currentBarWidth)
+
+        -- Rested XP bar
+        local restedXP = GetXPExhaustion() or 0
+        local restedPercentage = ((currentXP + restedXP) / maxXP) * 100
+        if restedPercentage > 100 then restedPercentage = 100 end
+        local restedBarWidth = availableWidth * (restedPercentage / 100)
+        xpBarRested:SetWidth(restedBarWidth)
     end
 end
 
@@ -332,11 +350,23 @@ function XPTracker:UpdateCurrentXP()
         currentXPLabel:SetTextColor(1, 1, 1, 1)  -- White
     end
 
-    -- Update XP bar foreground width based on percentage
+    -- Update XP bar widths
     local cardPadding = 5
     local availableWidth = currentXPCard:GetWidth() - (cardPadding * 2)
-    local barWidth = availableWidth * (percentage / 100)
-    xpBarFg:SetWidth(barWidth)
+
+    -- Current XP bar width
+    local currentBarWidth = availableWidth * (percentage / 100)
+    xpBarFg:SetWidth(currentBarWidth)
+
+    -- Rested XP bar width
+    local restedXP = GetXPExhaustion() or 0
+    local restedPercentage = 0
+    if maxXP > 0 then
+        restedPercentage = ((currentXP + restedXP) / maxXP) * 100
+        if restedPercentage > 100 then restedPercentage = 100 end
+    end
+    local restedBarWidth = availableWidth * (restedPercentage / 100)
+    xpBarRested:SetWidth(restedBarWidth)
 end
 
 -- Record XP sample for rate calculation
