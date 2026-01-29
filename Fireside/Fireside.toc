@@ -1,0 +1,12 @@
+## Interface: 20505
+## Title: Fireside
+## Notes: Modular dashboard system with draggable applets
+## Author: YourName
+## Version: 1.0.0
+## SavedVariables: FiresideDB
+
+Core\Applet.lua
+Core\Dashboard.lua
+Core\Init.lua
+Applets\XPTracker.lua
+Settings.lua
