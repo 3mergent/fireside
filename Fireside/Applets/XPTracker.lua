@@ -53,7 +53,7 @@ function XPTracker:OnInitialize()
 
     -- "CURRENT XP" label (15pt, 25% larger than original 12pt)
     currentXPLabel = self:CreateFontString(nil, "OVERLAY", 15, "CENTER", "TOP")
-    currentXPLabel:SetPoint("TOP", currentXPText, "BOTTOM", 0, -2)
+    currentXPLabel:SetPoint("TOP", currentXPText, "BOTTOM", 0, 2)  -- Reduced gap by 4px (was -2, now +2)
     currentXPLabel:SetText("CURRENT XP")
 
     -- Helper function to create a bordered card
@@ -220,9 +220,9 @@ function XPTracker:UpdateLayout()
     -- Reposition stat text (visually centered accounting for font weight)
     -- Offset UP to reduce top padding and balance the 4:1 ratio
 
-    -- Current XP number - offset up to balance visual weight
+    -- Current XP number - offset down for more top padding, less bottom padding
     currentXPText:ClearAllPoints()
-    currentXPText:SetPoint("CENTER", currentXPCard, "CENTER", 0, 5)
+    currentXPText:SetPoint("CENTER", currentXPCard, "CENTER", 0, -5)
 
     -- XP/HR number - offset up for visual balance
     xpPerHourText:ClearAllPoints()
