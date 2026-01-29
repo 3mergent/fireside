@@ -188,8 +188,9 @@ function XPTracker:UpdateLayout()
     currentXPCard:SetWidth(width - (padding * 2))
     currentXPCard:SetHeight(currentXPCardHeight)
 
-    -- Calculate stat card dimensions (2x2 grid)
-    local statCardsStartY = titleAreaHeight + currentXPHeight + 25  -- Moved down 20px to account for taller Current XP card
+    -- Calculate stat card dimensions (2x2 grid) - 5px gap from Current XP card
+    local currentXPCardEndY = currentXPCardY + currentXPCardHeight
+    local statCardsStartY = currentXPCardEndY + 5  -- 5px gap between cards
     local remainingHeight = height - statCardsStartY - padding  -- Calculate based on actual start position
     local statCardWidth = (width - (padding * 3)) / 2
     local statCardHeight = (remainingHeight - cardPadding) / 2
