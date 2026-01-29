@@ -34,7 +34,7 @@ function Fireside.Applet:Initialize()
     -- Create background texture (SetBackdrop doesn't work in TBC Anniversary)
     local bg = self.frame:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints(self.frame)
-    bg:SetColorTexture(0, 0, 0, 0.8)  -- Black with 80% opacity
+    bg:SetColorTexture(0, 0, 0, 0.5)  -- Black with 50% opacity (more transparent)
 
     -- Create border texture
     local border = self.frame:CreateTexture(nil, "BORDER")

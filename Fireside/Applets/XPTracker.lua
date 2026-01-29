@@ -4,7 +4,7 @@
 Fireside = Fireside or {}
 
 -- Create XP Tracker applet instance
-local XPTracker = Fireside.Applet:New("XPTracker", 280, 200)
+local XPTracker = Fireside.Applet:New("XPTracker", 280, 230)
 
 -- UI Elements
 local titleText
