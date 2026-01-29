@@ -4,7 +4,7 @@
 Fireside = Fireside or {}
 
 -- Create XP Tracker applet instance
-local XPTracker = Fireside.Applet:New("XPTracker", 280, 180)
+local XPTracker = Fireside.Applet:New("XPTracker", 280, 200)
 
 -- UI Elements
 local titleText
@@ -45,19 +45,19 @@ function XPTracker:OnInitialize()
     currentXPText:SetPoint("TOP", self.frame, "TOP", 0, -30)
     currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
 
-    -- "CURRENT XP" label (12pt, below number)
-    local currentXPLabel = self:CreateFontString(nil, "OVERLAY", 12, "CENTER", "TOP")
+    -- "CURRENT XP" label (15pt, 25% larger than original 12pt)
+    local currentXPLabel = self:CreateFontString(nil, "OVERLAY", 15, "CENTER", "TOP")
     currentXPLabel:SetPoint("TOP", currentXPText, "BOTTOM", 0, -2)
     currentXPLabel:SetText("CURRENT XP")
 
     -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
-    local statNumberSize = 24  -- Half of current XP size
-    local statLabelSize = 10
+    local statNumberSize = 36  -- 50% larger (was 24, now 36)
+    local statLabelSize = 13   -- 25% larger (was 10, now 12.5, rounded to 13)
     local columnWidth = self.width / 2
     local leftX = -columnWidth / 2
     local rightX = columnWidth / 2
-    local row2Y = -100
-    local row3Y = -145
+    local row2Y = -105
+    local row3Y = -160
 
     -- XP/HR (top left)
     xpPerHourText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
