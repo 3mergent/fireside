@@ -218,27 +218,27 @@ function XPTracker:UpdateLayout()
     timeCard:SetHeight(statCardHeight)
 
     -- Reposition stat text (visually centered accounting for font weight)
-    -- Offset down to compensate for top-heavy visual weight (4:1 ratio)
+    -- Offset UP to reduce top padding and balance the 4:1 ratio
 
-    -- Current XP number - offset down to balance visual weight
+    -- Current XP number - offset up to balance visual weight
     currentXPText:ClearAllPoints()
-    currentXPText:SetPoint("CENTER", currentXPCard, "CENTER", 0, -5)
+    currentXPText:SetPoint("CENTER", currentXPCard, "CENTER", 0, 5)
 
-    -- XP/HR number - offset down for visual balance
+    -- XP/HR number - offset up for visual balance
     xpPerHourText:ClearAllPoints()
-    xpPerHourText:SetPoint("CENTER", xpPerHourCard, "CENTER", 0, -8)
+    xpPerHourText:SetPoint("CENTER", xpPerHourCard, "CENTER", 0, 8)
 
-    -- KILLS number - offset down for visual balance
+    -- KILLS number - offset up for visual balance
     killsToLevelText:ClearAllPoints()
-    killsToLevelText:SetPoint("CENTER", killsCard, "CENTER", 0, -8)
+    killsToLevelText:SetPoint("CENTER", killsCard, "CENTER", 0, 8)
 
-    -- NEXT number - offset down for visual balance
+    -- NEXT number - offset up for visual balance
     nextLevelText:ClearAllPoints()
-    nextLevelText:SetPoint("CENTER", nextLevelCard, "CENTER", 0, -8)
+    nextLevelText:SetPoint("CENTER", nextLevelCard, "CENTER", 0, 8)
 
-    -- TIME number - offset down for visual balance
+    -- TIME number - offset up for visual balance
     timeToLevelText:ClearAllPoints()
-    timeToLevelText:SetPoint("CENTER", timeCard, "CENTER", 0, -8)
+    timeToLevelText:SetPoint("CENTER", timeCard, "CENTER", 0, 8)
 end
 
 -- Handle frame resize
