@@ -118,10 +118,10 @@ function XPTracker:OnInitialize()
     nextLevelCard = CreateBorderedCard(self.frame)
     timeCard = CreateBorderedCard(self.frame)
 
-    -- Create celebration background (green, 25% opacity, hidden by default)
+    -- Create celebration background (green, fades from 50% to 0% over 5 seconds)
     currentXPCardCelebrationBg = currentXPCard:CreateTexture(nil, "BACKGROUND")
     currentXPCardCelebrationBg:SetAllPoints(currentXPCard)
-    currentXPCardCelebrationBg:SetColorTexture(0, 1, 0, 0.25)  -- Green, 25% opacity
+    currentXPCardCelebrationBg:SetColorTexture(0, 1, 0, 0.5)  -- Green, 50% opacity initial
     currentXPCardCelebrationBg:Hide()
 
     -- Create XP bar (background - darker blue, static)
@@ -354,7 +354,16 @@ function XPTracker:UpdateCurrentXP()
         currentXPText:SetTextColor(0, 1, 0, 1)  -- Green
         currentXPLabel:SetText("LEVELED UP!")
         currentXPLabel:SetTextColor(0, 1, 0, 1)  -- Green
-        currentXPCardCelebrationBg:Show()  -- Show green background
+
+        -- Fade green background from 50% to 0% over 5 seconds
+        local fadeTime = 5  -- 5 seconds
+        if timeSinceLevelUp <= fadeTime then
+            local alpha = 0.5 * (1 - (timeSinceLevelUp / fadeTime))
+            currentXPCardCelebrationBg:SetColorTexture(0, 1, 0, alpha)
+            currentXPCardCelebrationBg:Show()
+        else
+            currentXPCardCelebrationBg:Hide()
+        end
     else
         -- Normal mode
         currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
