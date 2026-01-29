@@ -56,24 +56,24 @@ function XPTracker:OnInitialize()
     -- Create column container frames with borders
     -- Left column (XP/HR and NEXT)
     leftColumnFrame = CreateFrame("Frame", nil, self.frame)
-    leftColumnFrame:SetFrameLevel(self.frame:GetFrameLevel())
+    leftColumnFrame:SetFrameLevel(self.frame:GetFrameLevel() + 2)
 
-    -- Create 4 thin border textures (top, bottom, left, right) instead of filling
-    local leftBorderTop = leftColumnFrame:CreateTexture(nil, "BACKGROUND")
+    -- Create 4 thin border textures (top, bottom, left, right) as OVERLAY to be visible
+    local leftBorderTop = leftColumnFrame:CreateTexture(nil, "OVERLAY")
     leftBorderTop:SetHeight(1)
-    leftBorderTop:SetColorTexture(0.3, 0.3, 0.3, 1)
+    leftBorderTop:SetColorTexture(0.4, 0.4, 0.4, 1)
 
-    local leftBorderBottom = leftColumnFrame:CreateTexture(nil, "BACKGROUND")
+    local leftBorderBottom = leftColumnFrame:CreateTexture(nil, "OVERLAY")
     leftBorderBottom:SetHeight(1)
-    leftBorderBottom:SetColorTexture(0.3, 0.3, 0.3, 1)
+    leftBorderBottom:SetColorTexture(0.4, 0.4, 0.4, 1)
 
-    local leftBorderLeft = leftColumnFrame:CreateTexture(nil, "BACKGROUND")
+    local leftBorderLeft = leftColumnFrame:CreateTexture(nil, "OVERLAY")
     leftBorderLeft:SetWidth(1)
-    leftBorderLeft:SetColorTexture(0.3, 0.3, 0.3, 1)
+    leftBorderLeft:SetColorTexture(0.4, 0.4, 0.4, 1)
 
-    local leftBorderRight = leftColumnFrame:CreateTexture(nil, "BACKGROUND")
+    local leftBorderRight = leftColumnFrame:CreateTexture(nil, "OVERLAY")
     leftBorderRight:SetWidth(1)
-    leftBorderRight:SetColorTexture(0.3, 0.3, 0.3, 1)
+    leftBorderRight:SetColorTexture(0.4, 0.4, 0.4, 1)
 
     -- Position borders
     leftBorderTop:SetPoint("TOPLEFT", leftColumnFrame, "TOPLEFT")
@@ -90,24 +90,24 @@ function XPTracker:OnInitialize()
 
     -- Right column (KILLS and TIME)
     rightColumnFrame = CreateFrame("Frame", nil, self.frame)
-    rightColumnFrame:SetFrameLevel(self.frame:GetFrameLevel())
+    rightColumnFrame:SetFrameLevel(self.frame:GetFrameLevel() + 2)
 
-    -- Create 4 thin border textures
-    local rightBorderTop = rightColumnFrame:CreateTexture(nil, "BACKGROUND")
+    -- Create 4 thin border textures as OVERLAY to be visible
+    local rightBorderTop = rightColumnFrame:CreateTexture(nil, "OVERLAY")
     rightBorderTop:SetHeight(1)
-    rightBorderTop:SetColorTexture(0.3, 0.3, 0.3, 1)
+    rightBorderTop:SetColorTexture(0.4, 0.4, 0.4, 1)
 
-    local rightBorderBottom = rightColumnFrame:CreateTexture(nil, "BACKGROUND")
+    local rightBorderBottom = rightColumnFrame:CreateTexture(nil, "OVERLAY")
     rightBorderBottom:SetHeight(1)
-    rightBorderBottom:SetColorTexture(0.3, 0.3, 0.3, 1)
+    rightBorderBottom:SetColorTexture(0.4, 0.4, 0.4, 1)
 
-    local rightBorderLeft = rightColumnFrame:CreateTexture(nil, "BACKGROUND")
+    local rightBorderLeft = rightColumnFrame:CreateTexture(nil, "OVERLAY")
     rightBorderLeft:SetWidth(1)
-    rightBorderLeft:SetColorTexture(0.3, 0.3, 0.3, 1)
+    rightBorderLeft:SetColorTexture(0.4, 0.4, 0.4, 1)
 
-    local rightBorderRight = rightColumnFrame:CreateTexture(nil, "BACKGROUND")
+    local rightBorderRight = rightColumnFrame:CreateTexture(nil, "OVERLAY")
     rightBorderRight:SetWidth(1)
-    rightBorderRight:SetColorTexture(0.3, 0.3, 0.3, 1)
+    rightBorderRight:SetColorTexture(0.4, 0.4, 0.4, 1)
 
     -- Position borders
     rightBorderTop:SetPoint("TOPLEFT", rightColumnFrame, "TOPLEFT")
