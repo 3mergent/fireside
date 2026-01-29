@@ -107,12 +107,10 @@ function Fireside.Applet:Initialize()
         end
     end)
 
-    -- Enable resizing
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Setting up resize constraints...", 1, 1, 0)
+    -- Enable resizing (constraints handled manually in OnMouseUp)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Enabling frame resizing...", 1, 1, 0)
     self.frame:SetResizable(true)
-    self.frame:SetMinResize(self.minWidth, self.minHeight)
-    self.frame:SetMaxResize(self.maxWidth, self.maxHeight)
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Resize constraints set", 1, 1, 0)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame resizing enabled", 1, 1, 0)
 
     -- Load saved position or center on screen
     self:LoadPosition()
