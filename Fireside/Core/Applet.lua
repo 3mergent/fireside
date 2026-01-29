@@ -81,7 +81,7 @@ function Fireside.Applet:Initialize()
             applet.frame:StartSizing("BOTTOMRIGHT")
             applet.isResizing = true
 
-            -- Start OnUpdate loop to enforce constraints while dragging
+            -- Start OnUpdate loop to enforce constraints and update layout while dragging
             applet.frame:SetScript("OnUpdate", function(self, elapsed)
                 if applet.isResizing then
                     local width = applet.frame:GetWidth()
@@ -115,6 +115,9 @@ function Fireside.Applet:Initialize()
                     -- Update stored dimensions
                     applet.width = width
                     applet.height = height
+
+                    -- Update layout in real-time during resize
+                    applet:OnResize(width, height)
                 end
             end)
         end
@@ -128,9 +131,8 @@ function Fireside.Applet:Initialize()
             -- Stop the OnUpdate loop
             applet.frame:SetScript("OnUpdate", nil)
 
-            -- Save final size
+            -- Save final size (layout already updated during drag)
             applet:SaveSize()
-            applet:OnResize(applet.width, applet.height)
         end
     end)
 
