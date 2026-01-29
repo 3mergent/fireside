@@ -187,7 +187,7 @@ function Fireside.Applet:CreateFontString(name, layer, size, justifyH, justifyV)
     if not self.frame then return nil end
 
     local fs = self.frame:CreateFontString(name, layer or "OVERLAY")
-    fs:SetFont("Fonts\\FRIZQT__.TTF", size or 12, "OUTLINE")
+    fs:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", size or 12, "OUTLINE")
     fs:SetJustifyH(justifyH or "LEFT")
     fs:SetJustifyV(justifyV or "TOP")
     fs:SetTextColor(1, 1, 1, 1)
