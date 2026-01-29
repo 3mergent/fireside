@@ -23,15 +23,25 @@ end
 
 -- Event handler function
 local function OnEvent()
-    -- In TBC, event and arg1 are global variables set by the event system
-    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: OnEvent fired! event=" .. tostring(event) .. ", arg1=" .. tostring(arg1), 1, 0.5, 1)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: OnEvent() function called!", 1, 1, 1)
 
-    if event == "ADDON_LOADED" and arg1 == "Fireside" then
+    -- Try multiple ways to access event globals
+    local evt = _G.event or rawget(_G, "event") or event
+    local a1 = _G.arg1 or rawget(_G, "arg1") or arg1
+
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: event=" .. tostring(evt) .. ", arg1=" .. tostring(a1), 1, 0.5, 1)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: this=" .. tostring(this) .. ", frame=" .. tostring(this:GetName()), 1, 0.5, 1)
+
+    -- Check what globals exist
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: _G.event=" .. tostring(_G.event), 0.5, 0.5, 1)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: rawget(_G,'event')=" .. tostring(rawget(_G, "event")), 0.5, 0.5, 1)
+
+    if evt == "ADDON_LOADED" and a1 == "Fireside" then
         DEFAULT_CHAT_FRAME:AddMessage("DEBUG: ADDON_LOADED for Fireside detected!", 0, 1, 1)
         InitializeSavedVariables()
         DEFAULT_CHAT_FRAME:AddMessage("Fireside loaded. Type /fireside help for commands.", 0, 1, 0)
         DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard exists: " .. tostring(Fireside.Dashboard ~= nil), 1, 1, 0)
-    elseif event == "PLAYER_LOGIN" then
+    elseif evt == "PLAYER_LOGIN" then
         DEFAULT_CHAT_FRAME:AddMessage("DEBUG: PLAYER_LOGIN fired, initializing Dashboard...", 1, 1, 0)
         if Fireside.Dashboard and Fireside.Dashboard.Initialize then
             Fireside.Dashboard:Initialize()
