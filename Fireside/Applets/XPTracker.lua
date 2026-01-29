@@ -4,8 +4,8 @@
 Fireside = Fireside or {}
 
 -- Create XP Tracker applet instance (name, width, height, minWidth, maxWidth, minHeight, maxHeight)
--- Compact width, flexible height range (added 15px for XP bar)
-local XPTracker = Fireside.Applet:New("XPTracker", 168, 271, 150, 240, 271, 399)
+-- Compact width, flexible height range (added 15px for XP bar, reduced 5px top padding)
+local XPTracker = Fireside.Applet:New("XPTracker", 168, 266, 150, 240, 266, 394)
 
 -- UI Elements
 local logoTexture
@@ -215,9 +215,9 @@ function XPTracker:UpdateLayout()
     local titleAreaHeight = 30
     local currentXPHeight = 80
 
-    -- Current XP card (full width, at top) with 10px padding top and bottom, plus space for XP bar
+    -- Current XP card (full width, at top) with 5px padding top and bottom, plus space for XP bar
     local currentXPCardY = titleAreaHeight + 5
-    local currentXPCardHeight = currentXPHeight + 10 + 10 + 5  -- 10px top padding + 10px bar + 5px bar padding
+    local currentXPCardHeight = currentXPHeight + 5 + 10 + 5  -- 5px top padding + 10px bar + 5px bar padding
     currentXPCard:ClearAllPoints()
     currentXPCard:SetPoint("TOPLEFT", self.frame, "TOPLEFT", padding, -currentXPCardY)
     currentXPCard:SetWidth(width - (padding * 2))
