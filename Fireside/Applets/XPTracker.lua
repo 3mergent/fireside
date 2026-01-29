@@ -180,7 +180,7 @@ function XPTracker:OnInitialize()
     end
     self.frame:SetScript("OnEvent", OnEvent)
 
-    -- Set up OnUpdate for XP/hr tracking
+    -- Set up OnUpdate for XP/hr tracking and level-up timer
     local timeSinceLastUpdate = 0
     local function OnUpdate(self, elapsed)
         timeSinceLastUpdate = timeSinceLastUpdate + elapsed
@@ -188,6 +188,7 @@ function XPTracker:OnInitialize()
             XPTracker:RecordXPSample()
             XPTracker:UpdateXPPerHour()
             XPTracker:UpdateTimeToLevel()
+            XPTracker:UpdateCurrentXP()  -- Check level-up timer and update display
             timeSinceLastUpdate = 0
         end
     end
