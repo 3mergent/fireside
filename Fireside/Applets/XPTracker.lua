@@ -173,7 +173,7 @@ end
 function XPTracker:UpdateLayout()
     local width = self.width
     local height = self.height
-    local padding = 8
+    local padding = 5  -- Uniform 5px spacing everywhere
     local cardPadding = 5
 
     -- Calculate responsive positions
