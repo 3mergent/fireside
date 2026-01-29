@@ -46,6 +46,7 @@ function Fireside.Applet:Initialize()
     border:SetAllPoints(self.frame)
     border:SetColorTexture(0, 0, 0, 1.0)  -- Black border, fully opaque
 
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Creating resize handle...", 1, 1, 0)
     -- Create resize handle in bottom right corner
     self.resizeHandle = CreateFrame("Frame", nil, self.frame)
     self.resizeHandle:SetWidth(16)
@@ -58,6 +59,7 @@ function Fireside.Applet:Initialize()
     local resizeTexture = self.resizeHandle:CreateTexture(nil, "OVERLAY")
     resizeTexture:SetAllPoints(self.resizeHandle)
     resizeTexture:SetColorTexture(0.5, 0.5, 0.5, 0.8)  -- Gray, semi-transparent
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Resize handle created", 1, 1, 0)
 
     -- Dragging functionality
     local applet = self  -- Capture self for closures
@@ -106,21 +108,26 @@ function Fireside.Applet:Initialize()
     end)
 
     -- Enable resizing
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Setting up resize constraints...", 1, 1, 0)
     self.frame:SetResizable(true)
     self.frame:SetMinResize(self.minWidth, self.minHeight)
     self.frame:SetMaxResize(self.maxWidth, self.maxHeight)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Resize constraints set", 1, 1, 0)
 
     -- Load saved position or center on screen
     self:LoadPosition()
     self:LoadSize()
 
     -- Hide resize handle initially (will be shown on unlock)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Hiding resize handle...", 1, 1, 0)
     if self.resizeHandle then
         self.resizeHandle:Hide()
     end
 
     self.initialized = true
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Calling OnInitialize...", 1, 1, 0)
     self:OnInitialize()
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Applet initialization complete!", 0, 1, 0)
 end
 
 -- Override this in child classes for custom initialization
@@ -129,11 +136,14 @@ end
 
 -- Show the applet
 function Fireside.Applet:Show()
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Show() called for " .. self.name, 1, 1, 0)
     if not self.initialized then
         self:Initialize()
     end
     if self.frame then
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Calling frame:Show()...", 1, 1, 0)
         self.frame:Show()
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame shown, IsShown=" .. tostring(self.frame:IsShown()), 0, 1, 0)
     end
 end
 
