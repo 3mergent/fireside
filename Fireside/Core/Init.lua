@@ -27,7 +27,10 @@ eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_LOGIN")
 
 eventFrame:SetScript("OnEvent", function()
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: OnEvent fired! event=" .. tostring(event) .. ", arg1=" .. tostring(arg1), 1, 0.5, 1)
+
     if event == "ADDON_LOADED" and arg1 == "Fireside" then
+        DEFAULT_CHAT_FRAME:AddMessage("DEBUG: ADDON_LOADED for Fireside detected!", 0, 1, 1)
         InitializeSavedVariables()
         DEFAULT_CHAT_FRAME:AddMessage("Fireside loaded. Type /fireside help for commands.", 0, 1, 0)
         DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Dashboard exists: " .. tostring(Fireside.Dashboard ~= nil), 1, 1, 0)
