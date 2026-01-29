@@ -28,14 +28,18 @@ function Fireside.Applet:Initialize()
     -- Create main frame
     self.frame = CreateFrame("Frame", "Fireside" .. self.name .. "Frame", UIParent)
     DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame created: " .. tostring(self.frame ~= nil), 1, 1, 0)
+
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Setting frame properties...", 1, 1, 0)
     self.frame:SetWidth(self.width)
     self.frame:SetHeight(self.height)
     self.frame:SetFrameStrata("MEDIUM")
     self.frame:SetMovable(true)
     self.frame:EnableMouse(true)
     self.frame:RegisterForDrag("LeftButton")
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame properties set", 1, 1, 0)
 
     -- Set up backdrop (background and border)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Setting backdrop...", 1, 1, 0)
     self.frame:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
@@ -44,16 +48,20 @@ function Fireside.Applet:Initialize()
         edgeSize = 16,
         insets = { left = 4, right = 4, top = 4, bottom = 4 }
     })
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Backdrop set, setting colors...", 1, 1, 0)
     self.frame:SetBackdropColor(0, 0, 0, 0.8)
     self.frame:SetBackdropBorderColor(0, 0, 0, 1.0)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Backdrop colors set", 1, 1, 0)
 
     -- Add a bright test texture to make the frame visible
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Creating test texture...", 1, 1, 0)
     local testTexture = self.frame:CreateTexture(nil, "BACKGROUND")
     testTexture:SetAllPoints(self.frame)
     testTexture:SetColorTexture(1, 0, 0, 0.5)  -- Bright red, semi-transparent
     DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Added red test texture to frame", 1, 1, 0)
 
     -- Dragging functionality
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Setting up drag handlers...", 1, 1, 0)
     local applet = self  -- Capture self for closures
 
     self.frame:SetScript("OnDragStart", function()
@@ -66,12 +74,17 @@ function Fireside.Applet:Initialize()
         this:StopMovingOrSizing()
         applet:SavePosition()
     end)
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Drag handlers set", 1, 1, 0)
 
     -- Load saved position or center on screen
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Loading position...", 1, 1, 0)
     self:LoadPosition()
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Position loaded", 1, 1, 0)
 
     self.initialized = true
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Calling OnInitialize...", 1, 1, 0)
     self:OnInitialize()
+    DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Applet initialization complete!", 0, 1, 0)
 end
 
 -- Override this in child classes for custom initialization
