@@ -47,13 +47,20 @@ local function SlashCommandHandler(msg)
     end
     command = string.lower(command or "")
 
-    if command == "" or command == "help" then
+    if command == "" then
+        -- Open dashboard on /fireside with no arguments
+        if Fireside.Settings then
+            Fireside.Settings:Show()
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("Fireside: Dashboard not available.", 1, 0, 0)
+        end
+
+    elseif command == "help" then
         DEFAULT_CHAT_FRAME:AddMessage("Fireside Commands:", 1, 1, 0)
+        DEFAULT_CHAT_FRAME:AddMessage("/fireside - Open dashboard", 1, 1, 1)
         DEFAULT_CHAT_FRAME:AddMessage("/fireside toggle - Show/hide all applets", 1, 1, 1)
         DEFAULT_CHAT_FRAME:AddMessage("/fireside lock - Lock all applets", 1, 1, 1)
         DEFAULT_CHAT_FRAME:AddMessage("/fireside unlock - Unlock all applets", 1, 1, 1)
-        DEFAULT_CHAT_FRAME:AddMessage("/fireside settings - Open settings panel", 1, 1, 1)
-        DEFAULT_CHAT_FRAME:AddMessage("/fireside config - Open settings panel", 1, 1, 1)
         DEFAULT_CHAT_FRAME:AddMessage("/fireside reset - Reset all positions", 1, 1, 1)
         DEFAULT_CHAT_FRAME:AddMessage("/fireside list - List all applets", 1, 1, 1)
 
