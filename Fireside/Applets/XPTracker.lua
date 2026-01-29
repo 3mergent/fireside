@@ -4,8 +4,8 @@
 Fireside = Fireside or {}
 
 -- Create XP Tracker applet instance (name, width, height, minWidth, maxWidth, minHeight, maxHeight)
--- Compact dimensions: width reduced 40%, height reduced 20%
-local XPTracker = Fireside.Applet:New("XPTracker", 168, 176, 150, 240, 144, 256)
+-- Compact width, flexible height range
+local XPTracker = Fireside.Applet:New("XPTracker", 168, 256, 150, 240, 256, 384)
 
 -- UI Elements
 local titleText
