@@ -35,7 +35,8 @@ local xpSamples = {}
 local lastKillXP = 0
 local maxSamples = 60
 local updateInterval = 1.0
-local levelUpTime = 0  -- Timestamp of last level up
+local levelUpTime = 0  -- Timestamp of last level up (whole seconds)
+local levelUpTimeHiRes = 0  -- High-resolution timestamp for smooth fade animation
 local levelUpDuration = 300  -- 5 minutes in seconds
 local levelUpTestMode = false  -- Test mode flag
 local levelUpTestDuration = 30  -- 30 seconds for test mode
@@ -192,9 +193,9 @@ function XPTracker:OnInitialize()
     -- Set up OnUpdate for XP/hr tracking and level-up timer
     local timeSinceLastUpdate = 0
     local function OnUpdate(self, elapsed)
-        -- Update fade animation every frame for smooth transition
-        if levelUpTime > 0 then
-            local timeSinceLevelUp = time() - levelUpTime
+        -- Update fade animation every frame for smooth transition (using GetTime for sub-second precision)
+        if levelUpTimeHiRes > 0 then
+            local timeSinceLevelUp = GetTime() - levelUpTimeHiRes
             local fadeTime = 5  -- 5 seconds
             if timeSinceLevelUp <= fadeTime then
                 local alpha = 0.5 * (1 - (timeSinceLevelUp / fadeTime))
@@ -204,6 +205,7 @@ function XPTracker:OnInitialize()
                 end
             elseif currentXPCardCelebrationBg:IsShown() then
                 currentXPCardCelebrationBg:Hide()
+                levelUpTimeHiRes = 0  -- Clear hi-res timer after fade completes
             end
         end
 
@@ -528,6 +530,7 @@ function XPTracker:OnLevelUp()
 
     -- Record level up time for celebration display
     levelUpTime = time()
+    levelUpTimeHiRes = GetTime()  -- High-resolution timestamp for smooth fade
 
     self:UpdateNextLevel()
     self:UpdateCurrentXP()
@@ -539,6 +542,7 @@ end
 -- Test level up (for testing, expires after 30 seconds)
 function XPTracker:TestLevelUp()
     levelUpTime = time()
+    levelUpTimeHiRes = GetTime()  -- High-resolution timestamp for smooth fade
     levelUpTestMode = true
     self:UpdateCurrentXP()
     DEFAULT_CHAT_FRAME:AddMessage("Fireside: Test level-up activated (30 seconds)", 0, 1, 0)
