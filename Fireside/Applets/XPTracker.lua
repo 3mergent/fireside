@@ -265,9 +265,9 @@ function XPTracker:UpdateLayout()
     -- Reposition stat text (visually centered accounting for font weight)
     -- Offset UP to reduce top padding and balance the 4:1 ratio
 
-    -- Current XP number - offset slightly up with balanced padding
+    -- Current XP number - positioned near top with reduced spacing
     currentXPText:ClearAllPoints()
-    currentXPText:SetPoint("CENTER", currentXPCard, "CENTER", 0, 7)
+    currentXPText:SetPoint("TOP", currentXPCard, "TOP", 0, -6)
 
     -- XP/HR number - offset up for visual balance
     xpPerHourText:ClearAllPoints()
