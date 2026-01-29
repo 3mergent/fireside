@@ -44,14 +44,14 @@ function Fireside.Applet:Initialize()
     -- Dragging functionality
     local applet = self  -- Capture self for closures
 
-    self.frame:SetScript("OnDragStart", function()
+    self.frame:SetScript("OnDragStart", function(self)
         if not applet:IsLocked() then
-            this:StartMoving()
+            self:StartMoving()
         end
     end)
 
-    self.frame:SetScript("OnDragStop", function()
-        this:StopMovingOrSizing()
+    self.frame:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
         applet:SavePosition()
     end)
 
