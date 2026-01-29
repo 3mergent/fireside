@@ -192,6 +192,22 @@ function XPTracker:OnInitialize()
     -- Set up OnUpdate for XP/hr tracking and level-up timer
     local timeSinceLastUpdate = 0
     local function OnUpdate(self, elapsed)
+        -- Update fade animation every frame for smooth transition
+        if levelUpTime > 0 then
+            local timeSinceLevelUp = time() - levelUpTime
+            local fadeTime = 5  -- 5 seconds
+            if timeSinceLevelUp <= fadeTime then
+                local alpha = 0.5 * (1 - (timeSinceLevelUp / fadeTime))
+                currentXPCardCelebrationBg:SetColorTexture(0, 1, 0, alpha)
+                if not currentXPCardCelebrationBg:IsShown() then
+                    currentXPCardCelebrationBg:Show()
+                end
+            elseif currentXPCardCelebrationBg:IsShown() then
+                currentXPCardCelebrationBg:Hide()
+            end
+        end
+
+        -- Update XP tracking every second
         timeSinceLastUpdate = timeSinceLastUpdate + elapsed
         if timeSinceLastUpdate >= updateInterval then
             XPTracker:RecordXPSample()
@@ -350,20 +366,10 @@ function XPTracker:UpdateCurrentXP()
     local isRecentLevelUp = levelUpTime > 0 and timeSinceLevelUp < duration
 
     if isRecentLevelUp then
-        -- Level up celebration mode
+        -- Level up celebration mode (background fade handled in OnUpdate for smoothness)
         currentXPText:SetTextColor(0, 1, 0, 1)  -- Green
         currentXPLabel:SetText("LEVELED UP!")
         currentXPLabel:SetTextColor(0, 1, 0, 1)  -- Green
-
-        -- Fade green background from 50% to 0% over 5 seconds
-        local fadeTime = 5  -- 5 seconds
-        if timeSinceLevelUp <= fadeTime then
-            local alpha = 0.5 * (1 - (timeSinceLevelUp / fadeTime))
-            currentXPCardCelebrationBg:SetColorTexture(0, 1, 0, alpha)
-            currentXPCardCelebrationBg:Show()
-        else
-            currentXPCardCelebrationBg:Hide()
-        end
     else
         -- Normal mode
         currentXPText:SetTextColor(1, 1, 0, 1)  -- Yellow
