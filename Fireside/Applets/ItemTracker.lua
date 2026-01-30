@@ -34,6 +34,26 @@ function ItemTracker:OnInitialize()
         sessionCounts = saved.data.sessionCounts or {}
         sessionBaseline = saved.data.sessionBaseline or {}
         currentMode = saved.data.mode or "total"
+
+        -- Migrate old format (array of item IDs) to new format (array of item objects)
+        if table.getn(trackedItems) > 0 then
+            local firstItem = trackedItems[1]
+            if type(firstItem) == "number" then
+                -- Old format detected - convert to new format
+                local oldItems = trackedItems
+                trackedItems = {}
+                for _, itemID in ipairs(oldItems) do
+                    local itemName = GetItemInfo(itemID) or ("Item " .. itemID)
+                    table.insert(trackedItems, {
+                        name = itemName,
+                        itemID = itemID,
+                        price = 0,
+                        priority = 999
+                    })
+                end
+                DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Migrated " .. table.getn(oldItems) .. " items to new format", 1, 1, 0)
+            end
+        end
     end
 
     -- Logo (treasure chest icon)
@@ -182,7 +202,7 @@ function ItemTracker:StartNewSession()
 
     -- Record current counts as baseline
     for _, item in ipairs(trackedItems) do
-        if item.itemID then
+        if type(item) == "table" and item.itemID then
             local count = GetItemCount(item.itemID, true)  -- true = include bank
             sessionBaseline[item.itemID] = count
         end
@@ -206,7 +226,10 @@ end
 function ItemTracker:GetSortedItems()
     local sorted = {}
     for _, item in ipairs(trackedItems) do
-        table.insert(sorted, item)
+        -- Skip invalid items
+        if type(item) == "table" and item.name then
+            table.insert(sorted, item)
+        end
     end
 
     -- Sort by priority (ascending)
@@ -320,7 +343,7 @@ function ItemTracker:OnBagUpdate()
 
     -- Check each tracked item
     for _, item in ipairs(trackedItems) do
-        if item.itemID then
+        if type(item) == "table" and item.itemID then
             local currentCount = GetItemCount(item.itemID, true)
             local baseline = sessionBaseline[item.itemID] or 0
             local previousTotal = baseline + (sessionCounts[item.itemID] or 0)
@@ -407,8 +430,10 @@ end
 function ItemTracker:ItemsToText()
     local lines = {}
     for _, item in ipairs(trackedItems) do
-        local line = string.format("%s|%s|%s", item.name, tostring(item.price), tostring(item.priority))
-        table.insert(lines, line)
+        if type(item) == "table" and item.name then
+            local line = string.format("%s|%s|%s", item.name, tostring(item.price or 0), tostring(item.priority or 999))
+            table.insert(lines, line)
+        end
     end
     return table.concat(lines, "\n")
 end
@@ -416,7 +441,7 @@ end
 -- Resolve item names to item IDs
 function ItemTracker:ResolveItemIDs()
     for _, item in ipairs(trackedItems) do
-        if not item.itemID and item.name then
+        if type(item) == "table" and not item.itemID and item.name then
             -- Try to get item ID from name
             local itemLink = GetItemInfo(item.name)
             if itemLink then
@@ -450,7 +475,7 @@ function ItemTracker:ApplySettings()
         sessionCounts = {}
         sessionBaseline = {}
         for _, item in ipairs(trackedItems) do
-            if item.itemID then
+            if type(item) == "table" and item.itemID then
                 sessionBaseline[item.itemID] = GetItemCount(item.itemID, true)
                 sessionCounts[item.itemID] = 0
             end
