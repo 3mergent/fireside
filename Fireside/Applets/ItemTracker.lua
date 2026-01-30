@@ -26,14 +26,18 @@ local settingsPanel = nil
 local settingsTextBox = nil
 
 -- Initialize UI
+-- Initialize UI
 function ItemTracker:OnInitialize()
     DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: OnInitialize called", 0, 1, 1)
+
+    -- Capture self for use in pcall
+    local applet = self
 
     -- Wrap in pcall for error handling
     local success, err = pcall(function()
         -- Load saved data
         DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Loading saved data", 0, 1, 1)
-        local saved = FiresideDB.applets[self.name]
+        local saved = FiresideDB.applets[applet.name]
         if saved and saved.data then
             trackedItems = saved.data.trackedItems or {}
             sessionCounts = saved.data.sessionCounts or {}
@@ -66,89 +70,86 @@ function ItemTracker:OnInitialize()
 
         -- Logo (treasure chest icon)
         DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Creating UI elements", 0, 1, 1)
-    local logoSize = math.floor(self.width * 0.36)
-    logoTexture = self.frame:CreateTexture(nil, "ARTWORK")
-    logoTexture:SetTexture("Interface\\Icons\\INV_Box_02")  -- Treasure chest icon
-    logoTexture:SetWidth(logoSize)
-    logoTexture:SetHeight(logoSize)
-    local logoXOffset = 10 - math.floor(logoSize * 0.25)
-    local logoYOffset = math.floor(logoSize / 2) - 5
-    logoTexture:SetPoint("TOPLEFT", self.frame, "TOPLEFT", logoXOffset, logoYOffset)
+        local logoSize = math.floor(applet.width * 0.36)
+        logoTexture = applet.frame:CreateTexture(nil, "ARTWORK")
+        logoTexture:SetTexture("Interface\\Icons\\INV_Box_02")
+        logoTexture:SetWidth(logoSize)
+        logoTexture:SetHeight(logoSize)
+        local logoXOffset = 10 - math.floor(logoSize * 0.25)
+        local logoYOffset = math.floor(logoSize / 2) - 5
+        logoTexture:SetPoint("TOPLEFT", applet.frame, "TOPLEFT", logoXOffset, logoYOffset)
 
-    -- Title
-    titleText = self:CreateFontString(nil, "OVERLAY", 11, "RIGHT", "TOP")
-    titleText:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -30, -8)
-    titleText:SetText("Fireside Item Tracker")
-    titleText:SetTextColor(1, 0.82, 0, 1)
+        -- Title
+        titleText = applet:CreateFontString(nil, "OVERLAY", 11, "RIGHT", "TOP")
+        titleText:SetPoint("TOPRIGHT", applet.frame, "TOPRIGHT", -30, -8)
+        titleText:SetText("Fireside Item Tracker")
+        titleText:SetTextColor(1, 0.82, 0, 1)
 
-    -- Settings button (gear icon)
-    settingsButton = CreateFrame("Button", nil, self.frame)
-    settingsButton:SetWidth(20)
-    settingsButton:SetHeight(20)
-    settingsButton:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -5, -5)
-    settingsButton:SetNormalTexture("Interface\\Buttons\\UI-OptionsButton")
-    settingsButton:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight")
-    settingsButton:SetScript("OnClick", function()
-        self:ToggleSettings()
-    end)
+        -- Settings button (gear icon)
+        settingsButton = CreateFrame("Button", nil, applet.frame)
+        settingsButton:SetWidth(20)
+        settingsButton:SetHeight(20)
+        settingsButton:SetPoint("TOPRIGHT", applet.frame, "TOPRIGHT", -5, -5)
+        settingsButton:SetNormalTexture("Interface\\Buttons\\UI-OptionsButton")
+        settingsButton:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight")
+        settingsButton:SetScript("OnClick", function()
+            applet:ToggleSettings()
+        end)
 
-    -- Items container (scrollable area for item display)
-    itemsContainer = CreateFrame("Frame", nil, self.frame)
-    itemsContainer:SetFrameLevel(self.frame:GetFrameLevel() + 2)
+        -- Items container
+        itemsContainer = CreateFrame("Frame", nil, applet.frame)
+        itemsContainer:SetFrameLevel(applet.frame:GetFrameLevel() + 2)
 
-    -- Mode label
-    modeLabel = self:CreateFontString(nil, "OVERLAY", 11, "CENTER", "BOTTOM")
-    modeLabel:SetTextColor(0.7, 0.7, 0.7, 1)
+        -- Mode label
+        modeLabel = applet:CreateFontString(nil, "OVERLAY", 11, "CENTER", "BOTTOM")
+        modeLabel:SetTextColor(0.7, 0.7, 0.7, 1)
 
-    -- Toggle button for Session/Total
-    toggleButton = CreateFrame("Button", nil, self.frame)
-    toggleButton:SetWidth(80)
-    toggleButton:SetHeight(20)
-    toggleButton:SetFrameLevel(self.frame:GetFrameLevel() + 3)
+        -- Toggle button for Session/Total
+        toggleButton = CreateFrame("Button", nil, applet.frame)
+        toggleButton:SetWidth(80)
+        toggleButton:SetHeight(20)
+        toggleButton:SetFrameLevel(applet.frame:GetFrameLevel() + 3)
 
-    -- Toggle button background
-    local toggleBg = toggleButton:CreateTexture(nil, "BACKGROUND")
-    toggleBg:SetAllPoints(toggleButton)
-    toggleBg:SetColorTexture(0.2, 0.2, 0.2, 0.8)
+        local toggleBg = toggleButton:CreateTexture(nil, "BACKGROUND")
+        toggleBg:SetAllPoints(toggleButton)
+        toggleBg:SetColorTexture(0.2, 0.2, 0.2, 0.8)
 
-    -- Toggle button border
-    local toggleBorder = toggleButton:CreateTexture(nil, "BORDER")
-    toggleBorder:SetAllPoints(toggleButton)
-    toggleBorder:SetColorTexture(0.4, 0.4, 0.4, 1.0)
+        local toggleBorder = toggleButton:CreateTexture(nil, "BORDER")
+        toggleBorder:SetAllPoints(toggleButton)
+        toggleBorder:SetColorTexture(0.4, 0.4, 0.4, 1.0)
 
-    -- Toggle button text
-    local toggleText = toggleButton:CreateFontString(nil, "OVERLAY")
-    toggleText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 10, "OUTLINE")
-    toggleText:SetPoint("CENTER", toggleButton, "CENTER", 0, 0)
-    toggleText:SetTextColor(1, 1, 1, 1)
+        local toggleText = toggleButton:CreateFontString(nil, "OVERLAY")
+        toggleText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 10, "OUTLINE")
+        toggleText:SetPoint("CENTER", toggleButton, "CENTER", 0, 0)
+        toggleText:SetTextColor(1, 1, 1, 1)
 
-    toggleButton.text = toggleText
-    toggleButton:SetScript("OnClick", function()
-        self:ToggleMode()
-    end)
+        toggleButton.text = toggleText
+        toggleButton:SetScript("OnClick", function()
+            applet:ToggleMode()
+        end)
 
-    -- Enable right-click on frame to open settings
-    self.frame:RegisterForClicks("RightButtonUp")
-    self.frame:SetScript("OnMouseUp", function(frame, button)
-        if button == "RightButton" then
-            self:ToggleSettings()
-        end
-    end)
+        -- Enable right-click on frame to open settings
+        applet.frame:RegisterForClicks("RightButtonUp")
+        applet.frame:SetScript("OnMouseUp", function(frame, button)
+            if button == "RightButton" then
+                applet:ToggleSettings()
+            end
+        end)
 
         -- Register bag update events to track item gains
         DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Registering events", 0, 1, 1)
-        self.frame:RegisterEvent("BAG_UPDATE")
-        self.frame:SetScript("OnEvent", function()
+        applet.frame:RegisterEvent("BAG_UPDATE")
+        applet.frame:SetScript("OnEvent", function()
             if event == "BAG_UPDATE" then
-                self:OnBagUpdate()
+                applet:OnBagUpdate()
             end
         end)
 
         -- Initial layout and data update
         DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Updating layout", 0, 1, 1)
-        self:UpdateLayout()
-        self:UpdateToggleButton()
-        self:UpdateItemDisplay()
+        applet:UpdateLayout()
+        applet:UpdateToggleButton()
+        applet:UpdateItemDisplay()
 
         DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Initialization complete", 0, 1, 0)
     end)
@@ -157,6 +158,7 @@ function ItemTracker:OnInitialize()
         DEFAULT_CHAT_FRAME:AddMessage("Item Tracker ERROR: " .. tostring(err), 1, 0, 0)
     end
 end
+
 
 -- Update layout when resizing
 function ItemTracker:OnResize(width, height)
