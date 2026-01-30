@@ -27,36 +27,45 @@ local settingsTextBox = nil
 
 -- Initialize UI
 function ItemTracker:OnInitialize()
-    -- Load saved data
-    local saved = FiresideDB.applets[self.name]
-    if saved and saved.data then
-        trackedItems = saved.data.trackedItems or {}
-        sessionCounts = saved.data.sessionCounts or {}
-        sessionBaseline = saved.data.sessionBaseline or {}
-        currentMode = saved.data.mode or "total"
+    DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: OnInitialize called", 0, 1, 1)
 
-        -- Migrate old format (array of item IDs) to new format (array of item objects)
-        if table.getn(trackedItems) > 0 then
-            local firstItem = trackedItems[1]
-            if type(firstItem) == "number" then
-                -- Old format detected - convert to new format
-                local oldItems = trackedItems
-                trackedItems = {}
-                for _, itemID in ipairs(oldItems) do
-                    local itemName = GetItemInfo(itemID) or ("Item " .. itemID)
-                    table.insert(trackedItems, {
-                        name = itemName,
-                        itemID = itemID,
-                        price = 0,
-                        priority = 999
-                    })
+    -- Wrap in pcall for error handling
+    local success, err = pcall(function()
+        -- Load saved data
+        DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Loading saved data", 0, 1, 1)
+        local saved = FiresideDB.applets[self.name]
+        if saved and saved.data then
+            trackedItems = saved.data.trackedItems or {}
+            sessionCounts = saved.data.sessionCounts or {}
+            sessionBaseline = saved.data.sessionBaseline or {}
+            currentMode = saved.data.mode or "total"
+
+            DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Loaded " .. table.getn(trackedItems) .. " items", 0, 1, 1)
+
+            -- Migrate old format (array of item IDs) to new format (array of item objects)
+            if table.getn(trackedItems) > 0 then
+                local firstItem = trackedItems[1]
+                if type(firstItem) == "number" then
+                    -- Old format detected - convert to new format
+                    DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Migrating old format", 1, 1, 0)
+                    local oldItems = trackedItems
+                    trackedItems = {}
+                    for _, itemID in ipairs(oldItems) do
+                        local itemName = GetItemInfo(itemID) or ("Item " .. itemID)
+                        table.insert(trackedItems, {
+                            name = itemName,
+                            itemID = itemID,
+                            price = 0,
+                            priority = 999
+                        })
+                    end
+                    DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Migrated " .. table.getn(oldItems) .. " items to new format", 0, 1, 0)
                 end
-                DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Migrated " .. table.getn(oldItems) .. " items to new format", 1, 1, 0)
             end
         end
-    end
 
-    -- Logo (treasure chest icon)
+        -- Logo (treasure chest icon)
+        DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Creating UI elements", 0, 1, 1)
     local logoSize = math.floor(self.width * 0.36)
     logoTexture = self.frame:CreateTexture(nil, "ARTWORK")
     logoTexture:SetTexture("Interface\\Icons\\INV_Box_02")  -- Treasure chest icon
@@ -126,18 +135,27 @@ function ItemTracker:OnInitialize()
         end
     end)
 
-    -- Register bag update events to track item gains
-    self.frame:RegisterEvent("BAG_UPDATE")
-    self.frame:SetScript("OnEvent", function()
-        if event == "BAG_UPDATE" then
-            self:OnBagUpdate()
-        end
+        -- Register bag update events to track item gains
+        DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Registering events", 0, 1, 1)
+        self.frame:RegisterEvent("BAG_UPDATE")
+        self.frame:SetScript("OnEvent", function()
+            if event == "BAG_UPDATE" then
+                self:OnBagUpdate()
+            end
+        end)
+
+        -- Initial layout and data update
+        DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Updating layout", 0, 1, 1)
+        self:UpdateLayout()
+        self:UpdateToggleButton()
+        self:UpdateItemDisplay()
+
+        DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Initialization complete", 0, 1, 0)
     end)
 
-    -- Initial layout and data update
-    self:UpdateLayout()
-    self:UpdateToggleButton()
-    self:UpdateItemDisplay()
+    if not success then
+        DEFAULT_CHAT_FRAME:AddMessage("Item Tracker ERROR: " .. tostring(err), 1, 0, 0)
+    end
 end
 
 -- Update layout when resizing
@@ -147,6 +165,7 @@ end
 
 -- Update layout positions
 function ItemTracker:UpdateLayout()
+    DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: UpdateLayout called", 0, 1, 1)
     local cardPadding = 8
 
     -- Position items container
@@ -242,6 +261,8 @@ end
 
 -- Update item display
 function ItemTracker:UpdateItemDisplay()
+    DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: UpdateItemDisplay called", 0, 1, 1)
+
     -- Clear existing item frames
     for _, frame in ipairs(itemFrames) do
         frame:Hide()
@@ -250,6 +271,7 @@ function ItemTracker:UpdateItemDisplay()
 
     local sortedItems = self:GetSortedItems()
     local numItems = table.getn(sortedItems)
+    DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Displaying " .. numItems .. " items", 0, 1, 1)
 
     if numItems == 0 then
         -- Show a message when no items are tracked
