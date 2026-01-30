@@ -113,65 +113,99 @@ local function CreateDashboardFrame()
     xpTrackerLabel:SetText("XP Tracker")
     xpTrackerLabel:SetTextColor(1, 1, 1, 1)
 
-    -- XP Tracker open button
-    local xpTrackerButton = CreateFrame("Button", nil, xpTrackerCard)
-    xpTrackerButton:SetWidth(80)
-    xpTrackerButton:SetHeight(30)
-    xpTrackerButton:SetPoint("RIGHT", xpTrackerCard, "RIGHT", -15, 0)
+    -- Helper function to create toggle button
+    local function CreateToggleButton(parent, appletName)
+        local button = CreateFrame("Button", nil, parent)
+        button:SetWidth(80)
+        button:SetHeight(30)
+        button:SetPoint("RIGHT", parent, "RIGHT", -15, 0)
 
-    -- Button background
-    local buttonBg = xpTrackerButton:CreateTexture(nil, "BACKGROUND")
-    buttonBg:SetAllPoints(xpTrackerButton)
-    buttonBg:SetColorTexture(0.2, 0.2, 0.2, 0.8)
+        -- Button background
+        local bg = button:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints(button)
+        bg:SetColorTexture(0.2, 0.2, 0.2, 0.8)
 
-    -- Button border
-    local buttonBorderTop = xpTrackerButton:CreateTexture(nil, "BORDER")
-    buttonBorderTop:SetHeight(1)
-    buttonBorderTop:SetColorTexture(0.4, 0.4, 0.4, 1)
-    buttonBorderTop:SetPoint("TOPLEFT", xpTrackerButton, "TOPLEFT")
-    buttonBorderTop:SetPoint("TOPRIGHT", xpTrackerButton, "TOPRIGHT")
+        -- Button border
+        local borderTop = button:CreateTexture(nil, "BORDER")
+        borderTop:SetHeight(1)
+        borderTop:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderTop:SetPoint("TOPLEFT", button, "TOPLEFT")
+        borderTop:SetPoint("TOPRIGHT", button, "TOPRIGHT")
 
-    local buttonBorderBottom = xpTrackerButton:CreateTexture(nil, "BORDER")
-    buttonBorderBottom:SetHeight(1)
-    buttonBorderBottom:SetColorTexture(0.4, 0.4, 0.4, 1)
-    buttonBorderBottom:SetPoint("BOTTOMLEFT", xpTrackerButton, "BOTTOMLEFT")
-    buttonBorderBottom:SetPoint("BOTTOMRIGHT", xpTrackerButton, "BOTTOMRIGHT")
+        local borderBottom = button:CreateTexture(nil, "BORDER")
+        borderBottom:SetHeight(1)
+        borderBottom:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderBottom:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT")
+        borderBottom:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT")
 
-    local buttonBorderLeft = xpTrackerButton:CreateTexture(nil, "BORDER")
-    buttonBorderLeft:SetWidth(1)
-    buttonBorderLeft:SetColorTexture(0.4, 0.4, 0.4, 1)
-    buttonBorderLeft:SetPoint("TOPLEFT", xpTrackerButton, "TOPLEFT")
-    buttonBorderLeft:SetPoint("BOTTOMLEFT", xpTrackerButton, "BOTTOMLEFT")
+        local borderLeft = button:CreateTexture(nil, "BORDER")
+        borderLeft:SetWidth(1)
+        borderLeft:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderLeft:SetPoint("TOPLEFT", button, "TOPLEFT")
+        borderLeft:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT")
 
-    local buttonBorderRight = xpTrackerButton:CreateTexture(nil, "BORDER")
-    buttonBorderRight:SetWidth(1)
-    buttonBorderRight:SetColorTexture(0.4, 0.4, 0.4, 1)
-    buttonBorderRight:SetPoint("TOPRIGHT", xpTrackerButton, "TOPRIGHT")
-    buttonBorderRight:SetPoint("BOTTOMRIGHT", xpTrackerButton, "BOTTOMRIGHT")
+        local borderRight = button:CreateTexture(nil, "BORDER")
+        borderRight:SetWidth(1)
+        borderRight:SetColorTexture(0.4, 0.4, 0.4, 1)
+        borderRight:SetPoint("TOPRIGHT", button, "TOPRIGHT")
+        borderRight:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT")
 
-    -- Button text
-    local buttonText = xpTrackerButton:CreateFontString(nil, "OVERLAY")
-    buttonText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 13, "OUTLINE")
-    buttonText:SetPoint("CENTER", xpTrackerButton, "CENTER", 0, 0)
-    buttonText:SetText("Open")
-    buttonText:SetTextColor(1, 1, 1, 1)
+        -- Button text
+        local text = button:CreateFontString(nil, "OVERLAY")
+        text:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 13, "OUTLINE")
+        text:SetPoint("CENTER", button, "CENTER", 0, 0)
+        text:SetTextColor(1, 1, 1, 1)
 
-    -- Button hover effect
-    xpTrackerButton:SetScript("OnEnter", function(self)
-        buttonBg:SetColorTexture(0.3, 0.3, 0.3, 0.8)
-    end)
-
-    xpTrackerButton:SetScript("OnLeave", function(self)
-        buttonBg:SetColorTexture(0.2, 0.2, 0.2, 0.8)
-    end)
-
-    -- Button click
-    xpTrackerButton:SetScript("OnClick", function(self)
-        local xpTracker = Fireside.Dashboard:GetApplet("XPTracker")
-        if xpTracker then
-            xpTracker:Show()
+        -- Update button text based on applet visibility
+        local function UpdateButtonText()
+            local applet = Fireside.Dashboard:GetApplet(appletName)
+            if applet and applet.frame and applet.frame:IsShown() then
+                text:SetText("Hide")
+            else
+                text:SetText("Show")
+            end
         end
-    end)
+
+        -- Initial text
+        UpdateButtonText()
+
+        -- Button hover effect
+        button:SetScript("OnEnter", function(self)
+            bg:SetColorTexture(0.3, 0.3, 0.3, 0.8)
+        end)
+
+        button:SetScript("OnLeave", function(self)
+            bg:SetColorTexture(0.2, 0.2, 0.2, 0.8)
+        end)
+
+        -- Button click
+        button:SetScript("OnClick", function(self)
+            local applet = Fireside.Dashboard:GetApplet(appletName)
+            if applet then
+                applet:Toggle()
+                UpdateButtonText()
+            end
+        end)
+
+        return button
+    end
+
+    -- XP Tracker toggle button
+    local xpTrackerButton = CreateToggleButton(xpTrackerCard, "XPTracker")
+
+    -- Item Tracker card
+    local itemTrackerCard = CreateBorderedCard(dashboardFrame, 360, 60)
+    itemTrackerCard:SetPoint("TOP", xpTrackerCard, "BOTTOM", 0, -10)
+
+    -- Item Tracker label
+    local itemTrackerLabel = dashboardFrame:CreateFontString(nil, "OVERLAY")
+    itemTrackerLabel:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 16, "OUTLINE")
+    itemTrackerLabel:SetPoint("LEFT", itemTrackerCard, "LEFT", 15, 0)
+    itemTrackerLabel:SetText("Item Tracker")
+    itemTrackerLabel:SetTextColor(1, 1, 1, 1)
+
+    -- Item Tracker toggle button
+    local itemTrackerButton = CreateToggleButton(itemTrackerCard, "ItemTracker")
 
     -- Close button (X in top right)
     local closeButton = CreateFrame("Button", nil, dashboardFrame)
