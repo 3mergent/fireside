@@ -29,9 +29,9 @@ function Fireside.Dashboard:Initialize()
         if applet:IsEnabled() then
             applet:Initialize()
 
-            -- Only show if previously visible
+            -- Show if previously visible, or if visible state not yet set (first load)
             local saved = FiresideDB.applets[name]
-            if saved and saved.visible then
+            if not saved or saved.visible == nil or saved.visible then
                 applet:Show()
             end
 
