@@ -9,5 +9,6 @@ Core\Applet.lua
 Core\Dashboard.lua
 Core\Init.lua
 Applets\XPTracker.lua
+Applets\ItemTracker.lua
 Settings.lua
 MinimapIcon.lua
