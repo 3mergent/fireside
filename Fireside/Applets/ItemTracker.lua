@@ -16,13 +16,14 @@ local modeLabel
 local settingsButton
 
 -- Data
-local trackedItems = {}  -- List of item IDs to track
-local sessionCounts = {}  -- Count of items gained in current session
-local sessionBaseline = {}  -- Starting counts when session began
+local trackedItems = {}  -- List of item objects: {name, itemID, price, priority}
+local sessionCounts = {}  -- Count of items gained in current session (keyed by itemID)
+local sessionBaseline = {}  -- Starting counts when session began (keyed by itemID)
 local currentMode = "total"  -- "session" or "total"
 
 -- Settings Panel
 local settingsPanel = nil
+local settingsTextBox = nil
 
 -- Initialize UI
 function ItemTracker:OnInitialize()
@@ -47,15 +48,18 @@ function ItemTracker:OnInitialize()
 
     -- Title
     titleText = self:CreateFontString(nil, "OVERLAY", 11, "RIGHT", "TOP")
-    titleText:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -5, -8)
+    titleText:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -30, -8)
     titleText:SetText("Fireside Item Tracker")
     titleText:SetTextColor(1, 0.82, 0, 1)
 
-    -- Make heading clickable for settings
-    local headingButton = CreateFrame("Button", nil, self.frame)
-    headingButton:SetAllPoints(titleText)
-    headingButton:RegisterForClicks("LeftButtonUp")
-    headingButton:SetScript("OnClick", function()
+    -- Settings button (gear icon)
+    settingsButton = CreateFrame("Button", nil, self.frame)
+    settingsButton:SetWidth(20)
+    settingsButton:SetHeight(20)
+    settingsButton:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -5, -5)
+    settingsButton:SetNormalTexture("Interface\\Buttons\\UI-OptionsButton")
+    settingsButton:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight")
+    settingsButton:SetScript("OnClick", function()
         self:ToggleSettings()
     end)
 
@@ -177,9 +181,11 @@ function ItemTracker:StartNewSession()
     sessionBaseline = {}
 
     -- Record current counts as baseline
-    for _, itemID in ipairs(trackedItems) do
-        local count = GetItemCount(itemID, true)  -- true = include bank
-        sessionBaseline[itemID] = count
+    for _, item in ipairs(trackedItems) do
+        if item.itemID then
+            local count = GetItemCount(item.itemID, true)  -- true = include bank
+            sessionBaseline[item.itemID] = count
+        end
     end
 
     self:SaveData()
@@ -196,6 +202,21 @@ function ItemTracker:GetItemDisplayCount(itemID)
     end
 end
 
+-- Get sorted items by priority (lower priority number = higher in list)
+function ItemTracker:GetSortedItems()
+    local sorted = {}
+    for _, item in ipairs(trackedItems) do
+        table.insert(sorted, item)
+    end
+
+    -- Sort by priority (ascending)
+    table.sort(sorted, function(a, b)
+        return (a.priority or 999) < (b.priority or 999)
+    end)
+
+    return sorted
+end
+
 -- Update item display
 function ItemTracker:UpdateItemDisplay()
     -- Clear existing item frames
@@ -204,7 +225,9 @@ function ItemTracker:UpdateItemDisplay()
     end
     itemFrames = {}
 
-    local numItems = table.getn(trackedItems)
+    local sortedItems = self:GetSortedItems()
+    local numItems = table.getn(sortedItems)
+
     if numItems == 0 then
         -- Show a message when no items are tracked
         -- (optional - could add this later)
@@ -223,9 +246,14 @@ function ItemTracker:UpdateItemDisplay()
     local row = 0
     local col = 0
 
-    for i, itemID in ipairs(trackedItems) do
+    for i, item in ipairs(sortedItems) do
+        if not item.itemID then
+            -- Skip items that haven't been resolved yet
+            goto continue
+        end
+
         -- Get item info
-        local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = GetItemInfo(itemID)
+        local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = GetItemInfo(item.itemID)
         if not itemTexture then
             itemTexture = "Interface\\Icons\\INV_Misc_QuestionMark"
         end
@@ -248,7 +276,7 @@ function ItemTracker:UpdateItemDisplay()
         countText:SetPoint("TOP", icon, "BOTTOM", 0, -2)
         countText:SetTextColor(1, 1, 1, 1)
 
-        local count = self:GetItemDisplayCount(itemID)
+        local count = self:GetItemDisplayCount(item.itemID)
         countText:SetText(tostring(count))
 
         -- Calculate position
@@ -274,6 +302,8 @@ function ItemTracker:UpdateItemDisplay()
             col = 0
             row = row + 1
         end
+
+        ::continue::
     end
 end
 
@@ -289,26 +319,28 @@ function ItemTracker:OnBagUpdate()
     end
 
     -- Check each tracked item
-    for _, itemID in ipairs(trackedItems) do
-        local currentCount = GetItemCount(itemID, true)
-        local baseline = sessionBaseline[itemID] or 0
-        local previousTotal = baseline + (sessionCounts[itemID] or 0)
+    for _, item in ipairs(trackedItems) do
+        if item.itemID then
+            local currentCount = GetItemCount(item.itemID, true)
+            local baseline = sessionBaseline[item.itemID] or 0
+            local previousTotal = baseline + (sessionCounts[item.itemID] or 0)
 
-        if currentCount > previousTotal then
-            -- Item was gained!
-            local gained = currentCount - previousTotal
-            sessionCounts[itemID] = (sessionCounts[itemID] or 0) + gained
-            sessionBaseline[itemID] = currentCount - sessionCounts[itemID]
-        elseif currentCount < previousTotal then
-            -- Item was lost (used, sold, etc)
-            -- Update baseline to reflect new total, but keep session count
-            local sessionCount = sessionCounts[itemID] or 0
-            sessionBaseline[itemID] = currentCount - sessionCount
+            if currentCount > previousTotal then
+                -- Item was gained!
+                local gained = currentCount - previousTotal
+                sessionCounts[item.itemID] = (sessionCounts[item.itemID] or 0) + gained
+                sessionBaseline[item.itemID] = currentCount - sessionCounts[item.itemID]
+            elseif currentCount < previousTotal then
+                -- Item was lost (used, sold, etc)
+                -- Update baseline to reflect new total, but keep session count
+                local sessionCount = sessionCounts[item.itemID] or 0
+                sessionBaseline[item.itemID] = currentCount - sessionCount
 
-            -- If session count goes negative, reset it
-            if sessionBaseline[itemID] < 0 then
-                sessionBaseline[itemID] = currentCount
-                sessionCounts[itemID] = 0
+                -- If session count goes negative, reset it
+                if sessionBaseline[item.itemID] < 0 then
+                    sessionBaseline[item.itemID] = currentCount
+                    sessionCounts[item.itemID] = 0
+                end
             end
         end
     end
@@ -331,41 +363,104 @@ function ItemTracker:SaveData()
     }
 end
 
--- Add an item to track
-function ItemTracker:AddItem(itemID)
-    -- Check if already tracked
-    for _, id in ipairs(trackedItems) do
-        if id == itemID then
-            return false
+-- Parse items from text format
+-- Format: ItemName|price|priority (one per line)
+function ItemTracker:ParseItemsFromText(text)
+    local items = {}
+    local lines = {}
+
+    -- Split text into lines
+    for line in string.gmatch(text, "[^\r\n]+") do
+        table.insert(lines, line)
+    end
+
+    -- Parse each line
+    for _, line in ipairs(lines) do
+        local trimmed = string.gsub(line, "^%s*(.-)%s*$", "%1")  -- Trim whitespace
+        if trimmed ~= "" then
+            local parts = {}
+            for part in string.gmatch(trimmed, "[^|]+") do
+                table.insert(parts, part)
+            end
+
+            if table.getn(parts) >= 3 then
+                local itemName = string.gsub(parts[1], "^%s*(.-)%s*$", "%1")
+                local price = tonumber(parts[2])
+                local priority = tonumber(parts[3])
+
+                if itemName and price and priority then
+                    table.insert(items, {
+                        name = itemName,
+                        itemID = nil,  -- Will be resolved
+                        price = price,
+                        priority = priority
+                    })
+                end
+            end
         end
     end
 
-    table.insert(trackedItems, itemID)
+    return items
+end
 
-    -- Initialize session data for this item
+-- Convert items to text format
+function ItemTracker:ItemsToText()
+    local lines = {}
+    for _, item in ipairs(trackedItems) do
+        local line = string.format("%s|%s|%s", item.name, tostring(item.price), tostring(item.priority))
+        table.insert(lines, line)
+    end
+    return table.concat(lines, "\n")
+end
+
+-- Resolve item names to item IDs
+function ItemTracker:ResolveItemIDs()
+    for _, item in ipairs(trackedItems) do
+        if not item.itemID and item.name then
+            -- Try to get item ID from name
+            local itemLink = GetItemInfo(item.name)
+            if itemLink then
+                local itemID = tonumber(string.match(itemLink, "item:(%d+)"))
+                if itemID then
+                    item.itemID = itemID
+                end
+            end
+        end
+    end
+    self:SaveData()
+end
+
+-- Apply items from settings text box
+function ItemTracker:ApplySettings()
+    if not settingsTextBox then
+        return
+    end
+
+    local text = settingsTextBox:GetText()
+    local newItems = self:ParseItemsFromText(text)
+
+    -- Replace tracked items
+    trackedItems = newItems
+
+    -- Resolve item IDs
+    self:ResolveItemIDs()
+
+    -- Reset session data for new items
     if currentMode == "session" then
-        sessionBaseline[itemID] = GetItemCount(itemID, true)
-        sessionCounts[itemID] = 0
+        sessionCounts = {}
+        sessionBaseline = {}
+        for _, item in ipairs(trackedItems) do
+            if item.itemID then
+                sessionBaseline[item.itemID] = GetItemCount(item.itemID, true)
+                sessionCounts[item.itemID] = 0
+            end
+        end
     end
 
     self:SaveData()
     self:UpdateItemDisplay()
-    return true
-end
 
--- Remove an item from tracking
-function ItemTracker:RemoveItem(itemID)
-    for i, id in ipairs(trackedItems) do
-        if id == itemID then
-            table.remove(trackedItems, i)
-            sessionCounts[itemID] = nil
-            sessionBaseline[itemID] = nil
-            self:SaveData()
-            self:UpdateItemDisplay()
-            return true
-        end
-    end
-    return false
+    DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Settings applied!", 0, 1, 0)
 end
 
 -- Toggle settings panel
@@ -377,15 +472,18 @@ function ItemTracker:ToggleSettings()
     if settingsPanel:IsShown() then
         settingsPanel:Hide()
     else
+        -- Update text box with current items
+        if settingsTextBox then
+            settingsTextBox:SetText(self:ItemsToText())
+        end
         settingsPanel:Show()
-        self:UpdateSettingsPanel()
     end
 end
 
 -- Create settings panel UI
 function ItemTracker:CreateSettingsPanel()
     settingsPanel = CreateFrame("Frame", "FiresideItemTrackerSettings", UIParent)
-    settingsPanel:SetWidth(300)
+    settingsPanel:SetWidth(500)
     settingsPanel:SetHeight(400)
     settingsPanel:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     settingsPanel:SetFrameStrata("DIALOG")
@@ -438,6 +536,20 @@ function ItemTracker:CreateSettingsPanel()
     title:SetText("Item Tracker Settings")
     title:SetTextColor(1, 0.82, 0, 1)
 
+    -- Instructions
+    local instructions = settingsPanel:CreateFontString(nil, "OVERLAY")
+    instructions:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 10, "OUTLINE")
+    instructions:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 10, -35)
+    instructions:SetText("Format: ItemName|price|priority (one per line)")
+    instructions:SetTextColor(0.8, 0.8, 0.8, 1)
+
+    -- Example
+    local example = settingsPanel:CreateFontString(nil, "OVERLAY")
+    example:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 9, "OUTLINE")
+    example:SetPoint("TOPLEFT", instructions, "BOTTOMLEFT", 0, -3)
+    example:SetText("Example: Linen Cloth|0.2|2")
+    example:SetTextColor(0.6, 0.6, 0.6, 1)
+
     -- Close button
     local closeButton = CreateFrame("Button", nil, settingsPanel)
     closeButton:SetWidth(20)
@@ -449,161 +561,81 @@ function ItemTracker:CreateSettingsPanel()
         settingsPanel:Hide()
     end)
 
-    -- Add Item section
-    local addLabel = settingsPanel:CreateFontString(nil, "OVERLAY")
-    addLabel:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 12, "OUTLINE")
-    addLabel:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 10, -40)
-    addLabel:SetText("Add Item (enter Item ID):")
-    addLabel:SetTextColor(1, 1, 1, 1)
-
-    -- Input box for item ID
-    local inputBox = CreateFrame("EditBox", nil, settingsPanel)
-    inputBox:SetWidth(200)
-    inputBox:SetHeight(25)
-    inputBox:SetPoint("TOPLEFT", addLabel, "BOTTOMLEFT", 0, -5)
-    inputBox:SetAutoFocus(false)
-    inputBox:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 11, "OUTLINE")
-    inputBox:SetTextColor(1, 1, 1, 1)
-    inputBox:SetMaxLetters(20)
-
-    -- Input box background
-    local inputBg = inputBox:CreateTexture(nil, "BACKGROUND")
-    inputBg:SetAllPoints(inputBox)
-    inputBg:SetColorTexture(0.1, 0.1, 0.1, 0.8)
-
-    -- Input box border
-    local inputBorder = CreateFrame("Frame", nil, inputBox)
-    inputBorder:SetAllPoints(inputBox)
-    local inputBorderTex = inputBorder:CreateTexture(nil, "BORDER")
-    inputBorderTex:SetAllPoints(inputBorder)
-    inputBorderTex:SetColorTexture(0.4, 0.4, 0.4, 1)
-
-    inputBox:SetScript("OnEscapePressed", function()
-        inputBox:ClearFocus()
-    end)
-
-    -- Add button
-    local addButton = CreateFrame("Button", nil, settingsPanel)
-    addButton:SetWidth(60)
-    addButton:SetHeight(25)
-    addButton:SetPoint("LEFT", inputBox, "RIGHT", 5, 0)
-
-    local addBg = addButton:CreateTexture(nil, "BACKGROUND")
-    addBg:SetAllPoints(addButton)
-    addBg:SetColorTexture(0.2, 0.6, 0.2, 0.8)
-
-    local addText = addButton:CreateFontString(nil, "OVERLAY")
-    addText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 10, "OUTLINE")
-    addText:SetPoint("CENTER", addButton, "CENTER", 0, 0)
-    addText:SetText("Add")
-    addText:SetTextColor(1, 1, 1, 1)
-
-    addButton:SetScript("OnClick", function()
-        local itemID = tonumber(inputBox:GetText())
-        if itemID then
-            if self:AddItem(itemID) then
-                DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Added item " .. itemID, 0, 1, 0)
-                inputBox:SetText("")
-                self:UpdateSettingsPanel()
-            else
-                DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Item already tracked!", 1, 0, 0)
-            end
-        else
-            DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Invalid item ID!", 1, 0, 0)
-        end
-    end)
-
-    -- Tracked items list
-    local listLabel = settingsPanel:CreateFontString(nil, "OVERLAY")
-    listLabel:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 12, "OUTLINE")
-    listLabel:SetPoint("TOPLEFT", inputBox, "BOTTOMLEFT", 0, -20)
-    listLabel:SetText("Tracked Items:")
-    listLabel:SetTextColor(1, 1, 1, 1)
-
-    -- Scroll frame for tracked items
+    -- Scroll frame for text box
     local scrollFrame = CreateFrame("ScrollFrame", nil, settingsPanel)
-    scrollFrame:SetWidth(280)
-    scrollFrame:SetHeight(250)
-    scrollFrame:SetPoint("TOPLEFT", listLabel, "BOTTOMLEFT", 0, -5)
+    scrollFrame:SetWidth(480)
+    scrollFrame:SetHeight(280)
+    scrollFrame:SetPoint("TOPLEFT", example, "BOTTOMLEFT", 0, -10)
 
-    local scrollChild = CreateFrame("Frame", nil, scrollFrame)
-    scrollChild:SetWidth(280)
-    scrollChild:SetHeight(1)
-    scrollFrame:SetScrollChild(scrollChild)
+    -- Text box (EditBox with multi-line)
+    settingsTextBox = CreateFrame("EditBox", nil, scrollFrame)
+    settingsTextBox:SetWidth(480)
+    settingsTextBox:SetHeight(280)
+    settingsTextBox:SetMultiLine(true)
+    settingsTextBox:SetAutoFocus(false)
+    settingsTextBox:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 10, "OUTLINE")
+    settingsTextBox:SetTextColor(1, 1, 1, 1)
+    settingsTextBox:SetMaxLetters(0)
 
-    settingsPanel.scrollChild = scrollChild
+    scrollFrame:SetScrollChild(settingsTextBox)
+
+    -- Text box background
+    local textBg = scrollFrame:CreateTexture(nil, "BACKGROUND")
+    textBg:SetAllPoints(scrollFrame)
+    textBg:SetColorTexture(0.1, 0.1, 0.1, 0.8)
+
+    -- Text box border
+    local textBorder = CreateFrame("Frame", nil, scrollFrame)
+    textBorder:SetAllPoints(scrollFrame)
+    local textBorderTop = textBorder:CreateTexture(nil, "BORDER")
+    textBorderTop:SetHeight(1)
+    textBorderTop:SetColorTexture(0.4, 0.4, 0.4, 1)
+    textBorderTop:SetPoint("TOPLEFT", textBorder, "TOPLEFT")
+    textBorderTop:SetPoint("TOPRIGHT", textBorder, "TOPRIGHT")
+
+    local textBorderBottom = textBorder:CreateTexture(nil, "BORDER")
+    textBorderBottom:SetHeight(1)
+    textBorderBottom:SetColorTexture(0.4, 0.4, 0.4, 1)
+    textBorderBottom:SetPoint("BOTTOMLEFT", textBorder, "BOTTOMLEFT")
+    textBorderBottom:SetPoint("BOTTOMRIGHT", textBorder, "BOTTOMRIGHT")
+
+    local textBorderLeft = textBorder:CreateTexture(nil, "BORDER")
+    textBorderLeft:SetWidth(1)
+    textBorderLeft:SetColorTexture(0.4, 0.4, 0.4, 1)
+    textBorderLeft:SetPoint("TOPLEFT", textBorder, "TOPLEFT")
+    textBorderLeft:SetPoint("BOTTOMLEFT", textBorder, "BOTTOMLEFT")
+
+    local textBorderRight = textBorder:CreateTexture(nil, "BORDER")
+    textBorderRight:SetWidth(1)
+    textBorderRight:SetColorTexture(0.4, 0.4, 0.4, 1)
+    textBorderRight:SetPoint("TOPRIGHT", textBorder, "TOPRIGHT")
+    textBorderRight:SetPoint("BOTTOMRIGHT", textBorder, "BOTTOMRIGHT")
+
+    settingsTextBox:SetScript("OnEscapePressed", function()
+        settingsTextBox:ClearFocus()
+    end)
+
+    -- Apply button
+    local applyButton = CreateFrame("Button", nil, settingsPanel)
+    applyButton:SetWidth(100)
+    applyButton:SetHeight(30)
+    applyButton:SetPoint("BOTTOM", settingsPanel, "BOTTOM", 0, 10)
+
+    local applyBg = applyButton:CreateTexture(nil, "BACKGROUND")
+    applyBg:SetAllPoints(applyButton)
+    applyBg:SetColorTexture(0.2, 0.6, 0.2, 0.8)
+
+    local applyText = applyButton:CreateFontString(nil, "OVERLAY")
+    applyText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 12, "OUTLINE")
+    applyText:SetPoint("CENTER", applyButton, "CENTER", 0, 0)
+    applyText:SetText("Apply")
+    applyText:SetTextColor(1, 1, 1, 1)
+
+    applyButton:SetScript("OnClick", function()
+        self:ApplySettings()
+    end)
 
     settingsPanel:Hide()
-end
-
--- Update settings panel with current tracked items
-function ItemTracker:UpdateSettingsPanel()
-    if not settingsPanel or not settingsPanel.scrollChild then
-        return
-    end
-
-    -- Clear existing item entries
-    local children = { settingsPanel.scrollChild:GetChildren() }
-    for _, child in ipairs(children) do
-        child:Hide()
-    end
-
-    -- Create entry for each tracked item
-    local yOffset = 0
-    for i, itemID in ipairs(trackedItems) do
-        local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = GetItemInfo(itemID)
-        if not itemName then
-            itemName = "Item " .. itemID
-        end
-        if not itemTexture then
-            itemTexture = "Interface\\Icons\\INV_Misc_QuestionMark"
-        end
-
-        local entry = CreateFrame("Frame", nil, settingsPanel.scrollChild)
-        entry:SetWidth(280)
-        entry:SetHeight(30)
-        entry:SetPoint("TOPLEFT", settingsPanel.scrollChild, "TOPLEFT", 0, yOffset)
-
-        -- Item icon
-        local icon = entry:CreateTexture(nil, "ARTWORK")
-        icon:SetTexture(itemTexture)
-        icon:SetWidth(24)
-        icon:SetHeight(24)
-        icon:SetPoint("LEFT", entry, "LEFT", 5, 0)
-
-        -- Item name
-        local nameText = entry:CreateFontString(nil, "OVERLAY")
-        nameText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 10, "OUTLINE")
-        nameText:SetPoint("LEFT", icon, "RIGHT", 5, 0)
-        nameText:SetText(itemName)
-        nameText:SetTextColor(1, 1, 1, 1)
-
-        -- Remove button
-        local removeButton = CreateFrame("Button", nil, entry)
-        removeButton:SetWidth(50)
-        removeButton:SetHeight(20)
-        removeButton:SetPoint("RIGHT", entry, "RIGHT", -5, 0)
-
-        local removeBg = removeButton:CreateTexture(nil, "BACKGROUND")
-        removeBg:SetAllPoints(removeButton)
-        removeBg:SetColorTexture(0.6, 0.2, 0.2, 0.8)
-
-        local removeText = removeButton:CreateFontString(nil, "OVERLAY")
-        removeText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", 9, "OUTLINE")
-        removeText:SetPoint("CENTER", removeButton, "CENTER", 0, 0)
-        removeText:SetText("Remove")
-        removeText:SetTextColor(1, 1, 1, 1)
-
-        removeButton:SetScript("OnClick", function()
-            self:RemoveItem(itemID)
-            self:UpdateSettingsPanel()
-            DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Removed " .. itemName, 1, 1, 0)
-        end)
-
-        yOffset = yOffset - 30
-    end
-
-    settingsPanel.scrollChild:SetHeight(math.abs(yOffset))
 end
 
 -- Register applet with dashboard
@@ -613,44 +645,16 @@ Fireside.Dashboard:RegisterApplet(ItemTracker)
 SLASH_ITEMTRACKER1 = "/itemtracker"
 SLASH_ITEMTRACKER2 = "/itemtrack"
 SlashCmdList["ITEMTRACKER"] = function(msg)
-    local command, arg = string.match(msg, "^(%S+)%s*(.-)$")
-    if not command then
-        command = msg
-    end
-    command = string.lower(command or "")
+    local command = string.lower(msg or "")
 
     if command == "" or command == "settings" or command == "config" then
         ItemTracker:ToggleSettings()
-    elseif command == "add" and arg and arg ~= "" then
-        local itemID = tonumber(arg)
-        if itemID then
-            if ItemTracker:AddItem(itemID) then
-                DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Added item " .. itemID, 0, 1, 0)
-            else
-                DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Item already tracked!", 1, 0, 0)
-            end
-        else
-            DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Invalid item ID!", 1, 0, 0)
-        end
-    elseif command == "remove" and arg and arg ~= "" then
-        local itemID = tonumber(arg)
-        if itemID then
-            if ItemTracker:RemoveItem(itemID) then
-                DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Removed item " .. itemID, 1, 1, 0)
-            else
-                DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Item not tracked!", 1, 0, 0)
-            end
-        else
-            DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Invalid item ID!", 1, 0, 0)
-        end
     elseif command == "reset" then
         ItemTracker:StartNewSession()
         DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Session reset!", 1, 1, 0)
     else
         DEFAULT_CHAT_FRAME:AddMessage("Item Tracker Commands:", 1, 1, 0)
         DEFAULT_CHAT_FRAME:AddMessage("/itemtrack - Open settings", 1, 1, 1)
-        DEFAULT_CHAT_FRAME:AddMessage("/itemtrack add <itemID> - Add item to track", 1, 1, 1)
-        DEFAULT_CHAT_FRAME:AddMessage("/itemtrack remove <itemID> - Remove item", 1, 1, 1)
         DEFAULT_CHAT_FRAME:AddMessage("/itemtrack reset - Reset session counts", 1, 1, 1)
     end
 end

@@ -28,7 +28,12 @@ function Fireside.Dashboard:Initialize()
     for name, applet in pairs(self.applets) do
         if applet:IsEnabled() then
             applet:Initialize()
-            applet:Show()
+
+            -- Only show if previously visible
+            local saved = FiresideDB.applets[name]
+            if saved and saved.visible then
+                applet:Show()
+            end
 
             if self.locked then
                 applet:Lock()

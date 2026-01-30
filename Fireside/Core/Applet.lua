@@ -191,6 +191,12 @@ function Fireside.Applet:Show()
         DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Calling frame:Show()...", 1, 1, 0)
         self.frame:Show()
         DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Frame shown, IsShown=" .. tostring(self.frame:IsShown()), 0, 1, 0)
+
+        -- Save visible state
+        if not FiresideDB.applets[self.name] then
+            FiresideDB.applets[self.name] = {}
+        end
+        FiresideDB.applets[self.name].visible = true
     end
 end
 
@@ -198,6 +204,12 @@ end
 function Fireside.Applet:Hide()
     if self.frame then
         self.frame:Hide()
+
+        -- Save visible state
+        if not FiresideDB.applets[self.name] then
+            FiresideDB.applets[self.name] = {}
+        end
+        FiresideDB.applets[self.name].visible = false
     end
 end
 
