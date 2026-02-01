@@ -1,10 +1,16 @@
 -- Item Tracker Applet
 -- Tracks items gained in session or displays total counts
 
+DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: File loading...", 1, 0, 1)
+
 Fireside = Fireside or {}
+
+DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Creating applet instance...", 1, 0, 1)
 
 -- Create Item Tracker applet instance
 local ItemTracker = Fireside.Applet:New("ItemTracker", 220, 180, 180, 320, 140, 400)
+
+DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: Applet instance created", 1, 0, 1)
 
 -- UI Elements
 local logoTexture
@@ -158,6 +164,7 @@ function ItemTracker:OnInitialize()
     end
 end
 
+DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: OnInitialize function defined", 1, 0, 1)
 
 -- Update layout when resizing
 function ItemTracker:OnResize(width, height)
