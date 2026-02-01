@@ -26,7 +26,6 @@ local settingsPanel = nil
 local settingsTextBox = nil
 
 -- Initialize UI
--- Initialize UI
 function ItemTracker:OnInitialize()
     DEFAULT_CHAT_FRAME:AddMessage("Item Tracker: OnInitialize called", 0, 1, 1)
 
