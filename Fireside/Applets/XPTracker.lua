@@ -54,7 +54,7 @@ function XPTracker:OnInitialize()
 
     -- Logo on the left (36% of frame width, increased by 20%, floats over edge)
     local logoSize = math.floor(self.width * 0.36)
-    logoTexture = self.frame:CreateTexture(nil, "ARTWORK")
+    logoTexture = self.frame:CreateTexture(nil, "OVERLAY")
     logoTexture:SetTexture("Interface\\AddOns\\Fireside\\Images\\fireside-logo.png")
     logoTexture:SetWidth(logoSize)
     logoTexture:SetHeight(logoSize)
@@ -170,29 +170,33 @@ function XPTracker:OnInitialize()
     xpBarFg:SetHeight(10)
 
     -- Stats Grid (2x2): XP/HR, KILLS on top row; NEXT, TIME on bottom row
-    local statNumberSize = 29  -- Reduced by 20% from 36pt
+    local statNumberSize = math.floor(self.width * 0.17)  -- Scale with width (29pt at 168px width)
     local statLabelSize = 13   -- Keep subheading size unchanged
 
     -- XP/HR (top left)
     xpPerHourText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
+    xpPerHourText:SetTextColor(1, 1, 0, 1)  -- Yellow (same as currentXP)
     xpPerHourLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
     xpPerHourLabel:SetPoint("TOP", xpPerHourText, "BOTTOM", 0, -2)
     xpPerHourLabel:SetText("XP/HR")
 
     -- KILLS (top right)
     killsToLevelText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
+    killsToLevelText:SetTextColor(1, 1, 0, 1)  -- Yellow (same as currentXP)
     killsToLevelLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
     killsToLevelLabel:SetPoint("TOP", killsToLevelText, "BOTTOM", 0, -2)
     killsToLevelLabel:SetText("KILLS")
 
     -- NEXT (bottom left)
     nextLevelText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
+    nextLevelText:SetTextColor(1, 1, 0, 1)  -- Yellow (same as currentXP)
     nextLevelLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
     nextLevelLabel:SetPoint("TOP", nextLevelText, "BOTTOM", 0, -2)
     nextLevelLabel:SetText("NEXT")
 
     -- TIME (bottom right)
     timeToLevelText = self:CreateFontString(nil, "OVERLAY", statNumberSize, "CENTER", "TOP")
+    timeToLevelText:SetTextColor(1, 1, 0, 1)  -- Yellow (same as currentXP)
     timeToLevelLabel = self:CreateFontString(nil, "OVERLAY", statLabelSize, "CENTER", "TOP")
     timeToLevelLabel:SetPoint("TOP", timeToLevelText, "BOTTOM", 0, -2)
     timeToLevelLabel:SetText("TIME")
@@ -330,6 +334,21 @@ function XPTracker:UpdateLayout()
     timeCard:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -padding, -(statCardsStartY + statCardHeight + cardPadding))
     timeCard:SetWidth(statCardWidth)
     timeCard:SetHeight(statCardHeight)
+
+    -- Update stat text font sizes based on width
+    local statNumberSize = math.floor(width * 0.17)  -- Scale with width
+    if xpPerHourText then
+        xpPerHourText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", statNumberSize, "OUTLINE")
+    end
+    if killsToLevelText then
+        killsToLevelText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", statNumberSize, "OUTLINE")
+    end
+    if nextLevelText then
+        nextLevelText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", statNumberSize, "OUTLINE")
+    end
+    if timeToLevelText then
+        timeToLevelText:SetFont("Interface\\AddOns\\Fireside\\Fonts\\Accidental Presidency.ttf", statNumberSize, "OUTLINE")
+    end
 
     -- Reposition stat text (visually centered accounting for font weight)
     -- Offset UP to reduce top padding and balance the 4:1 ratio
